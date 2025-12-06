@@ -13,7 +13,7 @@ const features = [
   {
     icon: FaPeopleGroup,
     title: '市民科学',
-    description: '現在地から最寄りの避難所までのルートを瞬時に表示します。',
+    description: '市民科学。',
   },
   {
     icon: LuHeartHandshake,
