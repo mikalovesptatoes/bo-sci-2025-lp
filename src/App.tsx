@@ -10,9 +10,6 @@ import { Footer } from './components/Footer';
 export default function App() {
   return (
     <>
-      {/* テスト用の大きな赤文字 */}
-      <h1 style={{ fontSize: '40px', color: 'red' }}>TEST UPDATE 999</h1>
-
       <div className="min-h-screen bg-white">
         <Hero />
         <ImageSlideshow />
