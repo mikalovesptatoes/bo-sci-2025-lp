@@ -10,11 +10,11 @@ export function FixedApplyButton() {
           href={GOOGLE_FORM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-red-600 text-white px-6 py-4 rounded-lg 
-                     font-bold shadow-lg shadow-red-500/50 
+          className="flex items-center justify-center gap-2 w-full bg-orange-600 text-white px-6 py-4 rounded-lg 
+                     font-bold shadow-lg shadow-orange-500/50 
                      transition-all duration-300 transform 
                      animate-pulse 
-                     hover:bg-red-700 
+                     hover:bg-orange-700 
                      hover:scale-105 
                      hover:shadow-xl"
         >

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MapPin, Check, Users } from 'lucide-react';
 import { RiChatSmile2Line } from "react-icons/ri";
 import { LuPaintBucket } from "react-icons/lu";
+import { PiHandTap } from "react-icons/pi";
 
 type DemoStep = 'alert' | 'map' | 'safety';
 
@@ -23,9 +24,14 @@ export function DemoExperience() {
     <section id="demo" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="mb-4 text-gray-900">ツールを体験してみよう！</h2>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <PiHandTap className="text-gray-900 text-lg" />
+            <h2 className="text-gray-900 text-base sm:text-lg font-medium">
+              ツールを体験してみてください！
+            </h2>
+          </div>
           <p className="text-gray-600">
-            ワークショップの体験を<br/>“少しだけ”お届け！
+            ワークショップの体験を<br />“少しだけ”お届け！
           </p>
         </div>
 
@@ -33,33 +39,30 @@ export function DemoExperience() {
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           <button
             onClick={() => setActiveStep('alert')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${
-              activeStep === 'alert'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${activeStep === 'alert'
+              ? 'bg-orange-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             <LuPaintBucket className="w-5 h-5" />
             マーブリング
           </button>
           <button
             onClick={() => setActiveStep('map')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${
-              activeStep === 'map'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${activeStep === 'map'
+              ? 'bg-orange-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             <MapPin className="w-5 h-5" />
             防災行動マップ
           </button>
           <button
             onClick={() => setActiveStep('safety')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${
-              activeStep === 'safety'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg whitespace-nowrap transition-colors ${activeStep === 'safety'
+              ? 'bg-orange-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             <RiChatSmile2Line className="w-5 h-5" />
             ご近所アートチャット
@@ -85,7 +88,7 @@ export function DemoExperience() {
                 <p className="text-gray-600 text-sm">
                   ボタンを押して、災害発生時のアラート通知を体験してください
                 </p>
-                
+
                 {/* マーブリングの体験に合わせたアラートボタンの動作は、元のコードでは緊急アラート体験として実装されていますが、
                     動画ではマーブリングは視覚的なアート作成を示唆しています。
                     元のコードの意図通り、アラート機能として残します。
@@ -98,11 +101,11 @@ export function DemoExperience() {
                 </button>
 
                 {isAlertActive && (
-                  <div className="bg-red-50 border-2 border-red-500 rounded-lg p-4 animate-pulse">
+                  <div className="bg-orange-50 border-2 border-orange-500 rounded-lg p-4 animate-pulse">
                     <div className="flex items-start gap-3">
                       {/* Bellアイコンのインポートがないため、ここではプレースホルダーを使用します。 */}
-                      {/* <Bell className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" /> */}
-                      <span className="w-6 h-6 text-red-600 flex-shrink-0 mt-1">🔔</span>
+                      {/* <Bell className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" /> */}
+                      <span className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1">🔔</span>
                       <div>
                         <p className="text-red-900 mb-1">緊急地震速報</p>
                         <p className="text-red-800 text-sm mb-2">
@@ -165,16 +168,14 @@ export function DemoExperience() {
                     <button
                       key={member}
                       onClick={() => handleSafetyCheck(member)}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
-                        safetyStatus[member]
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${safetyStatus[member]
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          safetyStatus[member] ? 'bg-green-500' : 'bg-gray-200'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${safetyStatus[member] ? 'bg-green-500' : 'bg-gray-200'
+                          }`}>
                           {safetyStatus[member] ? (
                             <Check className="w-6 h-6 text-white" />
                           ) : (

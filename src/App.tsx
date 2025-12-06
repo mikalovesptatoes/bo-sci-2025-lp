@@ -1,4 +1,4 @@
-// 📝 src/App.tsx の内容（すべて上書きしてください）
+<h1 style={{ fontSize: '40px', color: 'red' }}>TEST UPDATE 999</h1>
 import { Hero } from './components/Hero';
 import { ImageSlideshow } from './components/ImageSlideshow';
 import { ReviewsCarousel } from './components/ReviewsCarousel';

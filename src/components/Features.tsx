@@ -2,6 +2,7 @@ import { LuPaintBucket } from "react-icons/lu";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { LuHeartHandshake } from "react-icons/lu";
 import { MdFamilyRestroom } from "react-icons/md";
+import { TbAlertHexagon } from "react-icons/tb";
 
 const features = [
   {
@@ -15,7 +16,7 @@ const features = [
     description: '現在地から最寄りの避難所までのルートを瞬時に表示します。',
   },
   {
-    icon: LuHeartHandshake ,
+    icon: LuHeartHandshake,
     title: '共助',
     description: 'いざというときに頼れるのはご近所さん',
   },
@@ -30,15 +31,20 @@ export function Features() {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
       <div className="text-center mb-12">
-        <h2 className="mb-4 text-gray-900">本ワークショップの目的</h2>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <TbAlertHexagon className="text-gray-900 text-lg" />
+          <h2 className="text-gray-900 text-base sm:text-lg font-medium">
+            ワークショップの目的
+          </h2>
+        </div>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          短文説明
+          説明
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {features.map((feature, index) => (
-          <div 
+          <div
             key={index}
             className="text-center p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
           >
