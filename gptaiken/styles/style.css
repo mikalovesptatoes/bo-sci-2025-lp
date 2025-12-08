@@ -1,0 +1,1147 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html{
+  height: 100%;
+  overflow: hidden; /* 画面のスクロールを禁止 */
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  min-height: 100vh;
+  height: 100%;
+  overflow: hidden; 
+  overflow-x: hidden;
+  background: linear-gradient(to bottom, #ffedd5, #fce7f3, #f3e8ff);
+}
+
+/* Header */
+/* Header */
+.header {
+  background: #ffffff;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;          /* 画面左右端までカバー */
+  z-index: 40;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-content {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 左側：ロゴ＋テキスト */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-logo-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(to bottom right, #f97316, #fb7185);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.header-logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.header-text-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-tagline {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.header-title-main {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 右側：申込ページに戻るボタン */
+.header-right {
+  flex-shrink: 0;
+}
+
+.header-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #1a16d8, #4d6eff);
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(99, 156, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.header-back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(99, 154, 255, 0.45);
+}
+
+.header-back-button:active {
+  transform: scale(0.97);
+}
+
+
+/* Site Guide */
+.site-guide {
+  background: linear-gradient(to right, #fed7aa, #fbcfe8);
+  border: 2px solid #fdba74;
+  border-radius: 16px;
+  /* margin: 16px; */
+  padding: 20px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 72px;              /* ヘッダーの下あたりに表示 */
+  left: 16px;
+  right: 16px;
+  z-index: 45;     
+  animation: slideDown 0.5s ease-out;
+}
+
+.site-guide.hidden {
+  display: none;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.guide-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.guide-close:hover {
+  background: #ffedd5;
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.guide-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.guide-icon-1 {
+  background: linear-gradient(to bottom right, #fb923c, #f472b6);
+}
+
+.guide-icon-2 {
+  background: linear-gradient(to bottom right, #f472b6, #c084fc);
+}
+
+.guide-icon-3 {
+  background: linear-gradient(to bottom right, #c084fc, #60a5fa);
+}
+
+.guide-text {
+  color: #7c2d12;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.guide-footer {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 8px;
+  border: 2px dashed #fdba74;
+  text-align: center;
+}
+
+.guide-footer p {
+  font-size: 14px;
+  color: #9a3412;
+}
+
+/* ArcGIS の MapView 本体 */
+#mapView {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Map Container */
+.map-container {
+  position: fixed; 
+  inset: 0;   
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map-container iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+.map-background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, rgba(220, 252, 231, 0.3), rgba(219, 234, 254, 0.3), rgba(243, 232, 255, 0.3));
+}
+
+.map-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  background-image: 
+    linear-gradient(to right, #cbd5e1 1px, transparent 1px),
+    linear-gradient(to bottom, #cbd5e1 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.map-blur {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.map-blur-1 {
+  top: 40px;
+  left: 40px;
+  width: 64px;
+  height: 64px;
+  background: rgba(187, 247, 208, 0.4);
+}
+
+.map-blur-2 {
+  top: 160px;
+  right: 80px;
+  width: 96px;
+  height: 96px;
+  background: rgba(191, 219, 254, 0.4);
+}
+
+.map-blur-3 {
+  bottom: 128px;
+  left: 25%;
+  width: 80px;
+  height: 80px;
+  background: rgba(233, 213, 255, 0.4);
+}
+
+.map-blur-4 {
+  bottom: 80px;
+  right: 33%;
+  width: 112px;
+  height: 112px;
+  background: rgba(251, 207, 232, 0.4);
+}
+
+.map-label {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fed7aa;
+}
+
+.map-label p {
+  font-size: 12px;
+  color: #c2410c;
+}
+
+.markers-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  inset: 0;   
+  pointer-events: none;
+}
+
+.bottom-instruction {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 24px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fdba74;
+}
+
+.bottom-instruction p {
+  font-size: 14px;
+  color: #c2410c;
+}
+
+/* Sprout Marker */
+.sprout-marker {
+  position: absolute;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  animation: sproutAppear 0.8s ease-out 0.5s both;
+}
+
+@keyframes sproutAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.sprout-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: sproutGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes sproutGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(134, 239, 172, 0);
+  }
+  50% {
+    box-shadow: 0 0 30px 15px rgba(134, 239, 172, 0.6);
+  }
+}
+
+.sprout-plant {
+  position: relative;
+  animation: sproutSway 3s ease-in-out infinite;
+}
+
+@keyframes sproutSway {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-3px) rotate(5deg);
+  }
+  66% {
+    transform: translateY(0) rotate(-5deg);
+  }
+}
+
+.sprout-stem {
+  width: 4px;
+  height: 48px;
+  background: linear-gradient(to top, #16a34a, #4ade80);
+  border-radius: 2px;
+  margin: 0 auto;
+}
+
+.sprout-leaves {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+
+.sprout-leaf {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.sprout-leaf-left {
+  background: linear-gradient(to bottom right, #4ade80, #22c55e);
+  transform: rotate(-45deg) translateX(-8px);
+  clip-path: ellipse(70% 85% at 30% 50%);
+  animation: leafWiggle1 2s ease-in-out infinite;
+}
+
+.sprout-leaf-right {
+  background: linear-gradient(to bottom left, #4ade80, #22c55e);
+  transform: rotate(45deg) translateX(8px);
+  clip-path: ellipse(70% 85% at 70% 50%);
+  animation: leafWiggle2 2s ease-in-out infinite 0.3s;
+}
+
+@keyframes leafWiggle1 {
+  0%, 100% { transform: rotate(-45deg) translateX(-8px); }
+  50% { transform: rotate(-55deg) translateX(-8px); }
+}
+
+@keyframes leafWiggle2 {
+  0%, 100% { transform: rotate(45deg) translateX(8px); }
+  50% { transform: rotate(55deg) translateX(8px); }
+}
+
+.sprout-flower {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  animation: flowerRotate 8s linear infinite;
+}
+
+@keyframes flowerRotate {
+  from { transform: translateX(-50%) rotate(0deg) scale(1); }
+  50% { transform: translateX(-50%) rotate(180deg) scale(1.2); }
+  to { transform: translateX(-50%) rotate(360deg) scale(1); }
+}
+
+.flower-petal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 16px;
+  background: linear-gradient(to top, #f472b6, #fbcfe8);
+  border-radius: 50%;
+  transform-origin: center bottom;
+  animation: petalAppear 0.5s ease-out both;
+}
+
+@keyframes petalAppear {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.flower-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(to bottom right, #fde047, #fb923c);
+  border-radius: 50%;
+  animation: centerAppear 0.3s ease-out 1.3s both;
+}
+
+@keyframes centerAppear {
+  from { transform: translate(-50%, -50%) scale(0); }
+  to { transform: translate(-50%, -50%) scale(1); }
+}
+
+.sprout-sparkle {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #facc15;
+  animation: sparkle 2s ease-in-out infinite 1s;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+}
+
+.sprout-badge {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, #4ade80, #10b981);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  white-space: nowrap;
+  animation: badgeAppear 0.5s ease-out 1.5s both;
+}
+
+@keyframes badgeAppear {
+  from { opacity: 0; transform: translateX(-50%) scale(0); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* =========================
+   芽クリック時の魔法キラキラ
+========================= */
+.sprout-magic {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sprout-glitter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0, #fef3c7 40%, transparent 70%);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
+  animation: sproutMagic 0.8s ease-out forwards;
+}
+
+@keyframes sproutMagic {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(
+               calc(-50% + var(--x)),
+               calc(-50% + var(--y))
+             )
+             scale(1);
+  }
+}
+
+/* 芽の説明ポップ（画面上部） */
+.sprout-info {
+  position: fixed;
+  top: 64px; /* ヘッダーの少し下 */
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 9999px;
+  padding: 10px 18px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  border: 2px solid #4ade80;
+  font-size: 13px;
+  color: #166534;
+  z-index: 46;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sprout-info.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 演出中に作品カードを隠す用 */
+.artwork-marker.hidden-artwork {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+
+/* Artwork Marker */
+.artwork-marker {
+  position: absolute;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  animation: markerAppear 0.5s ease-out both;
+  transition: transform 0.3s;
+  pointer-events: auto;
+}
+
+.artwork-marker:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+@keyframes markerAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.artwork-marker.popular .marker-container {
+  animation: popularGlow 2s ease-in-out infinite;
+}
+
+@keyframes popularGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px 8px rgba(251, 146, 60, 0.4);
+  }
+}
+
+.marker-container {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.marker-container:hover {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.3);
+}
+
+.artwork-marker.popular .marker-container {
+  border: 4px solid #fb923c;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.marker-image-wrapper {
+  width: 112px;
+  height: 112px;
+  background: white;
+  padding: 6px;
+  border-radius: 16px;
+}
+
+.marker-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.marker-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  padding: 8px;
+  border-radius: 0 0 16px 16px;
+}
+
+.marker-title {
+  color: white;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marker-author {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marker-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.marker-likes {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 4px 8px;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.marker-likes svg {
+  width: 12px;
+  height: 12px;
+  color: #ec4899;
+  fill: #ec4899;
+}
+
+.marker-likes span {
+  font-size: 12px;
+  color: #374151;
+}
+
+.marker-popular-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: linear-gradient(to right, #fb923c, #ec4899);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 10px;
+  animation: badgePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.marker-tap-hint {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f97316;
+  color: white;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.artwork-marker:hover .marker-tap-hint {
+  opacity: 1;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  width: 100%;
+  max-width: 768px;
+  max-height: 90vh;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .modal {
+    align-items: center;
+  }
+  .modal-content {
+    border-radius: 24px;
+  }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: white;
+}
+
+.modal-image-container {
+  background: linear-gradient(to bottom right, #ffedd5, #fce7f3);
+  padding: 16px;
+}
+
+.modal-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 320px);
+}
+
+.artwork-info {
+  padding: 24px;
+  border-bottom: 2px solid #fed7aa;
+}
+
+.artwork-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #c2410c;
+  margin-bottom: 4px;
+}
+
+.artwork-author {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.artwork-description {
+  background: linear-gradient(to right, #ffedd5, #fce7f3);
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #fed7aa;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.artwork-description svg {
+  width: 20px;
+  height: 20px;
+  color: #f97316;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.description-text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.like-button-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.like-button {
+  position: relative;
+  padding: 12px 32px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to right, #fb923c, #f472b6);
+  color: white;
+}
+
+.like-button:hover:not(:disabled) {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.like-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.like-button.liked {
+  background: linear-gradient(to right, #f472b6, #fb7185);
+}
+
+.like-button:disabled {
+  cursor: not-allowed;
+}
+
+.like-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.like-button.liked .like-icon {
+  fill: white;
+}
+
+.like-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.like-text span:first-child {
+  font-size: 14px;
+}
+
+.like-count-text {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.heart-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.heart-particle {
+  position: absolute;
+  animation: heartFly 0.8s ease-out forwards;
+}
+
+.heart-particle svg {
+  width: 24px;
+  height: 24px;
+  color: #ec4899;
+  fill: #ec4899;
+}
+
+@keyframes heartFly {
+  from {
+    opacity: 1;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* Comments Section */
+.comments-section {
+  padding: 24px;
+}
+
+.comments-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.comments-header svg {
+  width: 20px;
+  height: 20px;
+  color: #f97316;
+}
+
+.comments-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #c2410c;
+}
+
+.comment-count {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.comment-item {
+  background: linear-gradient(to right, rgba(255, 237, 213, 0.5), rgba(252, 231, 243, 0.5));
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #fed7aa;
+}
+
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-size: 14px;
+  color: #c2410c;
+}
+
+.comment-timestamp {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.comment-text {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.comment-likes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ec4899;
+}
+
+.comment-likes svg {
+  width: 12px;
+  height: 12px;
+  fill: #ec4899;
+}
+
+.comment-likes span {
+  font-size: 12px;
+}
+
+.comment-input-container {
+  position: relative;
+}
+
+.comment-input-wrapper {
+  background: linear-gradient(to right, #e9d5ff, #fbcfe8);
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px dashed #c084fc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.5;
+}
+
+.comment-input {
+  flex: 1;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: 2px solid #e5e7eb;
+  font-size: 14px;
+  outline: none;
+}
+
+.send-button {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to right, #fb923c, #f472b6);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  color: white;
+}
+
+.workshop-notice {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.workshop-notice p {
+  font-size: 14px;
+  color: #7c3aed;
+}
+
+/* ヘッダーや案内ボックスではピンチ・余計なジェスチャを無効化 */
+.header,
+.site-guide,
+#artworkModal {
+  touch-action: pan-y;  /* 縦スクロールだけ許可（ほぼ動かないけど念のため） */
+}
+
+/* 地図上では ArcGIS JS に全タッチイベントを預ける */
+#mapView {
+  touch-action: none;   /* JS ライブラリがピンチ操作をフルで扱えるように */
+}
