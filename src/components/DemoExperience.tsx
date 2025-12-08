@@ -4,6 +4,8 @@ import { RiChatSmile2Line } from "react-icons/ri";
 import { LuPaintBucket } from "react-icons/lu";
 import { PiHandTap } from "react-icons/pi";
 import mablingVideo from '../videos/malbling.mp4';
+// chatVideoを新たに定義（ここではmablingVideoを流用します）
+import chatVideo from '../videos/malbling.mp4'; // 実際には適切な動画に置き換えてください
 
 type DemoStep = 'alert' | 'map' | 'safety';
 
@@ -11,7 +13,7 @@ export function DemoExperience() {
   const [activeStep, setActiveStep] = useState<DemoStep>('alert');
   const [isAlertActive, setIsAlertActive] = useState(false); // この変数は未使用ですが、元のコードのまま残します
   const [safetyStatus, setSafetyStatus] = useState<{ [key: string]: boolean }>({});
-
+  // safetyStatus と familyMembers は 'safety' セクションの仕様変更により不要になりますが、元のコードから削除はせず未使用として残しておきます
   const familyMembers = ['お父さん', 'お母さん', '妹'];
 
   const handleSafetyCheck = (member: string) => {
@@ -111,7 +113,7 @@ export function DemoExperience() {
 
               {/* 3. 「体験する」ボタン (動画の下) */}
               <a
-                href="src/taiken/malbling.html"
+                href="/gptaiken/index.html"
                 className="w-full inline-flex items-center justify-center gap-2 
                           bg-orange-600 text-white font-bold text-lg 
                           px-6 py-4 rounded-xl shadow-lg 
@@ -123,7 +125,6 @@ export function DemoExperience() {
                 このアートを体験する！
               </a>
             </div>
-            // 🚨 ここまで
           )}
           {/* ========================================================== */}
 
@@ -160,53 +161,50 @@ export function DemoExperience() {
             </div>
           )}
 
+          {/* ======== ご近所アートチャットセクション (activeStep === 'safety') ======== */}
+          {/* マーブリングと同じ表示内容に変更 */}
           {activeStep === 'safety' && (
             <div className="p-6 space-y-6">
-              <h3 className="text-gray-900 font-bold">家族の安否確認</h3>
-              <p className="text-gray-600 text-sm">
-                家族の安全状態をチェックしてください
-              </p>
-
-              <div className="space-y-3">
-                {familyMembers.map((member) => (
-                  <button
-                    key={member}
-                    onClick={() => handleSafetyCheck(member)}
-                    className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${safetyStatus[member]
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${safetyStatus[member] ? 'bg-green-500' : 'bg-gray-200'
-                        }`}>
-                        {safetyStatus[member] ? (
-                          <Check className="w-6 h-6 text-white" />
-                        ) : (
-                          <Users className="w-6 h-6 text-gray-500" />
-                        )}
-                      </div>
-                      <div className="text-left">
-                        <p className="text-gray-900">{member}</p>
-                        <p className="text-sm text-gray-500">
-                          {safetyStatus[member] ? '安全を確認しました' : '未確認'}
-                        </p>
-                      </div>
-                    </div>
-                    {safetyStatus[member] && (
-                      <span className="text-green-600 text-sm">✓ 無事</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-900 text-sm">
-                  {Object.values(safetyStatus).filter(Boolean).length} / {familyMembers.length} 人の安全を確認
+              {/* 1. 簡単な説明セクション (動画の上) */}
+              <div className="text-center space-y-2">
+                <h3 className="text-gray-900 font-bold text-xl">
+                  ご近所アートチャット
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  説明
                 </p>
               </div>
+
+              {/* 2. スマホ風フレーム内の動画表示（chatVideoを直接表示） */}
+              <div className="relative rounded-lg overflow-hidden shadow-xl border-4 border-gray-100/50">
+                <div className="aspect-video bg-gray-700 flex items-center justify-center">
+                  <video
+                    src={chatVideo}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* 3. 「体験する」ボタン (動画の下) */}
+              <a
+                href="gptaiken/index.html"
+                className="w-full inline-flex items-center justify-center gap-2 
+                          bg-orange-600 text-white font-bold text-lg 
+                          px-6 py-4 rounded-xl shadow-lg 
+                          hover:bg-orange-700 transition-all transform hover:scale-[1.03]
+                          focus:outline-none focus:ring-4 focus:ring-orange-300 active:bg-orange-800
+                          animate-bounce animate-once hover:animate-none"
+              >
+                <PiHandTap className="w-6 h-6" />
+                ご近所さんの活動を見てみる！
+              </a>
             </div>
           )}
+          {/* ========================================================== */}
         </div>
       </div>
     </section >
