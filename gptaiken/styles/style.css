@@ -26,7 +26,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;          /* 画面左右端までカバー */
+  right: 0;          
   z-index: 40;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -41,25 +41,21 @@ body {
 /* 左側：ロゴ＋テキスト */
 .header-left {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .header-logo-box {
-  width: 40px;
-  height: 40px;
   border-radius: 8px;
-  background: linear-gradient(to bottom right, #f97316, #fb7185);
   display: flex;
-  align-items: center;
+  align-items: flex-start; 
   justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
-.header-logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #ffffff;
+.header-logo-image {
+  height: 40px; 
+  width: auto;
+  object-fit: contain;
 }
 
 .header-text-block {
@@ -68,7 +64,8 @@ body {
   gap: 2px;
 }
 
-.header-tagline {
+.header-tagline,
+.header-title-sub {
   font-size: 11px;
   letter-spacing: 0.08em;
   color: #6b7280;
@@ -116,13 +113,17 @@ body {
   background: linear-gradient(to right, #fed7aa, #fbcfe8);
   border: 2px solid #fdba74;
   border-radius: 16px;
-  /* margin: 16px; */
   padding: 20px;
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
   position: fixed;
-  top: 72px;              /* ヘッダーの下あたりに表示 */
-  left: 16px;
-  right: 16px;
+  position: fixed;
+  top: 50%;               
+  left: 50%;              
+  transform: translate(-50%, -50%); 
+  max-height: 90vh;         
+  overflow-y: auto;
+  width: calc(100% - 32px); 
+  max-width: 400px;
   z-index: 45;     
   animation: slideDown 0.5s ease-out;
 }
@@ -134,18 +135,18 @@ body {
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translate(-50%, -50%) translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, -50%);
   }
 }
 
 .guide-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   width: 32px;
   height: 32px;
   background: white;
@@ -157,6 +158,17 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: background 0.2s;
+  animation: floatClick 2s ease-in-out infinite;
+}
+@keyframes floatClick {
+    0%, 100% {
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
+    }
 }
 
 .guide-close:hover {
@@ -164,6 +176,7 @@ body {
 }
 
 .guide-content {
+  padding-top: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -228,6 +241,34 @@ body {
 }
 
 /* Map Container */
+.map-guide-button {
+  position: absolute;
+  top: 100px; 
+  right: 16px; 
+  z-index: 1000; 
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* より目立つシャドウ */
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s, opacity 0.2s;
+  background: linear-gradient(to bottom right, #fb923c, #f472b6);
+  color: white; 
+}
+
+.map-guide-button:hover {
+  transform: scale(1.1);
+}
+
+.map-guide-button.hidden {
+  display: none;
+}
+
 .map-container {
   position: fixed; 
   inset: 0;   
@@ -317,7 +358,7 @@ body {
 }
 
 .markers-container {
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 100%;
   inset: 0;   
@@ -329,6 +370,8 @@ body {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
+  display: inline-block; 
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   padding: 12px 20px;
@@ -534,16 +577,23 @@ body {
   pointer-events: none;
 }
 
+.sprout-magic-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 43;        /* ヘッダーより下・マーカーより上くらい */
+  overflow: hidden;
+}
+
 .sprout-glitter {
   position: absolute;
-  top: 50%;
-  left: 50%;
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: radial-gradient(circle, #ffffff 0, #fef3c7 40%, transparent 70%);
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
-  animation: sproutMagic 0.8s ease-out forwards;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.9);
+  /* left, top は JS から芽の中心に設定 */
+  animation: sproutMagic 1s ease-out forwards;
 }
 
 @keyframes sproutMagic {
@@ -554,10 +604,10 @@ body {
   to {
     opacity: 0;
     transform: translate(
-               calc(-50% + var(--x)),
-               calc(-50% + var(--y))
+               calc(-50% + var(--dx)),
+               calc(-50% + var(--dy))
              )
-             scale(1);
+             scale(1.2);
   }
 }
 

@@ -31,7 +31,7 @@ require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
     center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
     zoom: 12,
     constraints: {
-      minZoom: 11,
+      minScale: 10000,
       maxZoom: 18,
       rotationEnabled: false,
     },
@@ -68,50 +68,44 @@ require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
 });
 
 // Initialize
-document.addEventListener("DOMContentLoaded", () => {});
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("mapGuideButton").style.display = "none";
+});
+
+function closeSiteGuide() {
+  document.getElementById("siteGuide").classList.add("hidden");
+  document.getElementById("mapGuideButton").style.display = "flex";
+}
+
+// Show site guide
+function showSiteGuide() {
+  document.getElementById("siteGuide").classList.remove("hidden");
+  document.getElementById("mapGuideButton").style.display = "none";
+}
 
 // Calculate clusters for sprouts
+// 3つの作品の「真ん中」に芽を1つだけ出す
 function calculateClusters(artworks) {
-  const clusters = [];
-  const threshold = 35; // 画面上での距離（%ベース）
-  const processed = new Set();
+  // MapView または作品がなければ何もしない
+  if (!view || !artworks.length) return [];
 
-  // 各作品のスクリーン座標％を先に計算
-  const positioned = artworks.map((art) => ({
-    ...art,
-    position: getScreenPositionPercent(art.geometry),
-  }));
-
-  positioned.forEach((artwork) => {
-    if (processed.has(artwork.id)) return;
-
-    const nearby = positioned.filter((other) => {
-      if (other.id === artwork.id || processed.has(other.id)) return false;
-      const dy = artwork.position.top - other.position.top;
-      const dx = artwork.position.left - other.position.left;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance < threshold;
-    });
-
-    if (nearby.length >= 1) {
-      const allInCluster = [artwork, ...nearby];
-      const centerTop =
-        allInCluster.reduce((sum, a) => sum + a.position.top, 0) /
-        allInCluster.length;
-      const centerLeft =
-        allInCluster.reduce((sum, a) => sum + a.position.left, 0) /
-        allInCluster.length;
-
-      clusters.push({
-        position: { top: centerTop, left: centerLeft },
-        count: allInCluster.length,
-      });
-
-      allInCluster.forEach((a) => processed.add(a.id));
-    }
+  // 各作品のスクリーン座標(%)を計算
+  const positions = artworks.map((art) => {
+    return getScreenPositionPercent(art.geometry);
   });
 
-  return clusters;
+  // 3つ（またはN個）の平均位置を取る = 画面上での「真ん中」
+  const centerTop =
+    positions.reduce((sum, p) => sum + p.top, 0) / positions.length;
+  const centerLeft =
+    positions.reduce((sum, p) => sum + p.left, 0) / positions.length;
+
+  return [
+    {
+      position: { top: centerTop, left: centerLeft },
+      count: artworks.length, // 3つの作品で1つの芽
+    },
+  ];
 }
 
 async function loadArtworksFromSurvey() {
@@ -161,7 +155,9 @@ async function loadArtworksFromSurvey() {
       title: a.Message || "(タイトル未入力)",
       author: a.field_25 || "作者不明",
       imageUrl,
-      description: descriptions.join(" / "),
+      description: "",
+      marbling: a.Mabling || "",
+      collage: a.collage || "",
       likes: 0,
       geometry: f.geometry,
       comments: [],
@@ -245,7 +241,7 @@ function createSproutMarker(cluster) {
         </svg>
       </div>
       <div class="sprout-badge">
-        作品が${cluster.count}つ咲いています
+        ${cluster.count}つの作品によって共助の芽が育っています！
       </div>
     </div>
   `;
@@ -255,45 +251,58 @@ function createSproutMarker(cluster) {
 }
 
 // 芽をクリックしたときの演出
+// 芽をクリックしたときの演出
 let sproutInfoTimer = null;
 
 function handleSproutClick(cluster, sproutElement) {
-  // 作品カードを一時的に隠す
+  // 作品カードを非表示に（このまま戻さない）
   const markers = document.querySelectorAll(".artwork-marker");
   markers.forEach((m) => m.classList.add("hidden-artwork"));
 
-  // 既存の魔法エフェクトを消す
-  const oldMagic = sproutElement.querySelector(".sprout-magic");
-  if (oldMagic) oldMagic.remove();
+  // 既存の魔法オーバーレイがあれば削除
+  const oldOverlay = document.querySelector(".sprout-magic-overlay");
+  if (oldOverlay) oldOverlay.remove();
 
-  // 魔法キラキラ用コンテナ
-  const magic = document.createElement("div");
-  magic.className = "sprout-magic";
-  sproutElement.appendChild(magic);
+  // 全画面オーバーレイを作成
+  const overlay = document.createElement("div");
+  overlay.className = "sprout-magic-overlay";
+  document.body.appendChild(overlay);
+
+  // 芽の画面上の中心座標を取得
+  const rect = sproutElement.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // 画面対角線長（どの方向にも飛ばせるように少し大きめ）
+  const maxDist = Math.hypot(window.innerWidth, window.innerHeight) * 1.6;
 
   // 粒を生成
-  const count = 24;
+  const count = 140; // ← 80 くらいから増量
   for (let i = 0; i < count; i++) {
     const p = document.createElement("div");
     p.className = "sprout-glitter";
 
-    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-    const distance = 40 + Math.random() * 40; // 半径
+    // 発射角度と距離
+    const angle = Math.random() * Math.PI * 2;
+    const distance = maxDist * (0.4 + Math.random() * 0.6);
 
-    const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
 
-    p.style.setProperty("--x", `${x}px`);
-    p.style.setProperty("--y", `${y}px`);
+    // 初期位置（芽の中心）
+    p.style.left = `${centerX}px`;
+    p.style.top = `${centerY}px`;
+    p.style.setProperty("--dx", `${dx}px`);
+    p.style.setProperty("--dy", `${dy}px`);
 
-    magic.appendChild(p);
+    overlay.appendChild(p);
   }
 
   // 芽の説明ポップを表示
   const info = document.getElementById("sproutInfo");
   const infoText = document.getElementById("sproutInfoText");
   if (info && infoText) {
-    infoText.textContent = `このあたりには、${cluster.count}つの防災アート作品が咲いています。気になる作品をタップしてみよう！`;
+    infoText.textContent = `このあたりには、${cluster.count}つの防災アート作品が咲いています。芽を目印に、どんな作品があるか想像してみよう！`;
     info.classList.add("show");
 
     if (sproutInfoTimer) clearTimeout(sproutInfoTimer);
@@ -302,11 +311,10 @@ function handleSproutClick(cluster, sproutElement) {
     }, 4000);
   }
 
-  // 一定時間後に作品カードを戻す
+  // きらきらは一定時間後にオーバーレイごと消す（作品カードは復活させない）
   setTimeout(() => {
-    markers.forEach((m) => m.classList.remove("hidden-artwork"));
-    if (magic.parentNode) magic.parentNode.removeChild(magic);
-  }, 1000);
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }, 1200);
 }
 
 // Create artwork marker
@@ -345,11 +353,6 @@ function createArtworkMarker(artwork, position) {
   return marker;
 }
 
-// Close site guide
-function closeSiteGuide() {
-  document.getElementById("siteGuide").classList.add("hidden");
-}
-
 // Open modal
 function openModal(artwork) {
   currentArtwork = artwork;
@@ -361,7 +364,27 @@ function openModal(artwork) {
   document.getElementById(
     "modalAuthor"
   ).textContent = `作者：${artwork.author}`;
-  document.getElementById("modalDescription").textContent = artwork.description;
+
+  // ★ 説明欄を「マーブリング」「コラージュ」に分けて表示
+  const descEl = document.getElementById("modalDescription");
+  const marblingText = artwork.marbling || "";
+  const collageText = artwork.collage || "";
+
+  if (marblingText || collageText) {
+    descEl.innerHTML = `
+      <div class="description-block">
+        <p class="description-label">マーブリングで表現したこと：</p>
+        <p class="description-text">${marblingText || "（記入なし）"}</p>
+      </div>
+      <div class="description-block">
+        <p class="description-label">コラージュで表現したこと：</p>
+        <p class="description-text">${collageText || "（記入なし）"}</p>
+      </div>
+    `;
+  } else {
+    // marbling/collage がまだ無い場合は、従来の description をそのまま表示
+    descEl.textContent = artwork.description || "";
+  }
 
   updateLikeButton();
   renderComments(artwork.comments);
