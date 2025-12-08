@@ -1,6 +1,7 @@
 import { Calendar,Clock , Users } from 'lucide-react';
 import { LuPenLine } from "react-icons/lu";
 import { AiOutlineSmile } from "react-icons/ai";
+import { BiCommentDetail } from "react-icons/bi";
 
 const details = [
   {
@@ -46,14 +47,17 @@ export function WorkshopDetails() {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h3 className="text-gray-900 text-center text-lg font-semibold">
-              ワークショップ詳細
-            </h3>
-          <p className="text-gray-600">
-            ご参加お待ちしております！
-          </p>
+        <div className="flex justify-center items-center gap-2 mb-4">
+        <BiCommentDetail className="w-6 h-6 text-orange-600" />
+        <h3 className="text-gray-900 text-center text-lg font-semibold">
+          ワークショップ詳細
+        </h3>
         </div>
+
+        {/* 注意書き追加 */}
+        <p className="text-center text-gray-600 mb-6 text-sm">
+          ご参加お待ちしております！
+        </p>
 
         {/* 開催概要 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -105,7 +109,6 @@ export function WorkshopDetails() {
        {/* こんな方におすすめ */}
 <div className="mt-24">  
   <div className="flex justify-center items-center gap-2 mb-4">
-    {/* 左にアイコン追加（Lucide の CheckCircle） */}
     <AiOutlineSmile className="w-6 h-6 text-orange-600" />
     <h3 className="text-gray-900 text-center text-lg font-semibold">
       こんな方におすすめ！
