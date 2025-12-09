@@ -24,7 +24,7 @@
     
         <div class="logo-and-sub-title"> 
             <div class="header-logo-box">
-              <img src="./images/bo.png" alt="防" class="header-logo-image">
+              <img src="/images/bo.png" alt="防" class="header-logo-image">
             </div>
             
             <p class="header-title-sub">お試し版</p>
@@ -43,6 +43,29 @@
       </div>
   </div>
   </header>
+  <!-- 体験終了ポップアップ -->
+<div id="endPopup" class="end-popup hidden">
+  <div class="end-popup-backdrop"></div>
+  <div class="end-popup-content">
+    <h2 class="end-popup-title">体験を終了しますか？</h2>
+    <p class="end-popup-text">
+      このまま終了するか、ワークショップのお申し込みに進むことができます。
+    </p>
+    <div class="end-popup-buttons">
+      <button id="backToTopButton" class="end-popup-btn outline-blue">
+      はじめに戻る
+    </button>
+    <button id="goToWorkshopButton" class="end-popup-btn fill-orange">
+      ワークショップに申し込む
+    </button>
+
+    </div>
+    <button id="cancelEndButton" class="end-popup-cancel">
+      キャンセル
+    </button>
+  </div>
+</div>
+
   
   <!-- Sprout info popup -->
   <div id="sproutInfo" class="sprout-info">
@@ -115,7 +138,7 @@
   <div class="bottom-instruction">
     <p>
       <i class="fa-regular fa-hand-pointer"></i> 
-      作品をタップしてみよう！
+      作品を探してタップしてみよう！
     </p>
   </div>
 

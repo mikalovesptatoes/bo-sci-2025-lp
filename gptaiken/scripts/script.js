@@ -27,60 +27,76 @@ let artworkLikes = {};
 let currentArtwork = null;
 let hasLiked = false;
 let likedArtworks = JSON.parse(localStorage.getItem("likedArtworks") || "{}");
+let bottomInstruction;
 
 // === ArcGIS Map の初期化 & Survey 読み込み ===
-require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
-  WebMap,
-  MapView,
+require(["esri/WebScene", "esri/views/SceneView", "esri/geometry/Circle"], (
+  WebScene,
+  SceneView,
   Circle
 ) => {
   const tsunashimaCenter = {
     longitude: 139.6348,
-    latitude: 35.5369,
+    latitude: 35.534,
+    z: 500,
   };
 
-  // Web マップ（mapID）を読み込む
-  const map = new WebMap({
+  const scene = new WebScene({
     portalItem: {
-      id: "70429b65f4b14047a6564766ed6b7334",
+      id: "824c34a6b9134c67a8f649d027a08e0c",
     },
   });
 
-  // View を作成
-  view = new MapView({
+  view = new SceneView({
     container: "mapView",
-    map,
-    center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
-    zoom: 12,
+    map: scene,
     constraints: {
-      minScale: 15000,
-      maxZoom: 18,
-      rotationEnabled: false,
+      tilt: {
+        max: 80,
+        mode: "manual",
+      },
     },
-  });
-
-  const allowedCircle = new Circle({
-    center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
-    radius: 10000,
-    radiusUnit: "meters",
   });
 
   view.when(() => {
+    const initialCamera = {
+      position: {
+        longitude: 139.415,
+        latitude: 30.62, // ここを少しずつ変えて微調整してOK
+        z: 500, // 高さ
+      },
+      tilt: 60,
+      heading: 0,
+    };
+
+    view.goTo(initialCamera);
+    const maxZoomOutScale = 10000; // 1:15000
+
+    view.watch("scale", (scale) => {
+      // ArcGIS の scale は「大きい数字 = より縮小」
+      if (scale > maxZoomOutScale) {
+        view.scale = maxZoomOutScale; // それ以上は縮小させない
+      }
+    });
+
+    const allowedCircle = new Circle({
+      center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
+      radius: 10000,
+      radiusUnit: "meters",
+    });
+
     view.constraints.geometry = allowedCircle;
 
-    // Web マップ内から Survey レイヤーを探す（名前 "survey" 想定）
     surveyLayer = view.map.allLayers.find(
       (lyr) => lyr.title === "survey" || lyr.id === "survey"
     );
 
-    // 見つかったら Survey から作品データを読み込む
     if (surveyLayer) {
       loadArtworksFromSurvey();
     } else {
       console.warn("Survey layer not found.");
     }
 
-    // 地図をパン・ズームしたあとにマーカー位置を更新
     view.watch("stationary", (v) => {
       if (v && artworks.length) {
         renderMarkers();
@@ -91,11 +107,57 @@ require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
+  // 最初は下のメッセージを表示、ガイドボタンは隠す
+  bottomInstruction = document.querySelector(".bottom-instruction");
   document.getElementById("mapGuideButton").style.display = "none";
-  document.querySelector(".bottom-instruction").classList.remove("show");
-});
+  bottomInstruction.classList.remove("show");
 
-const bottomInstruction = document.querySelector(".bottom-instruction");
+  const endButton = document.querySelector(".header-back-button");
+  const endPopup = document.getElementById("endPopup");
+  const backToTopButton = document.getElementById("backToTopButton");
+  const goToWorkshopButton = document.getElementById("goToWorkshopButton");
+  const cancelEndButton = document.getElementById("cancelEndButton");
+  const endBackdrop = document.querySelector(".end-popup-backdrop");
+
+  function openEndPopup() {
+    endPopup.classList.remove("hidden");
+  }
+
+  function closeEndPopup() {
+    endPopup.classList.add("hidden");
+  }
+
+  // 「体験を終わる」クリック → ポップ表示（デフォルトリンクは無効化）
+  if (endButton) {
+    endButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      openEndPopup();
+    });
+  }
+
+  // 「はじめに戻る」 → ルートの index.html へ
+  if (backToTopButton) {
+    backToTopButton.addEventListener("click", () => {
+      window.location.href = "../index.html"; // gptaiken/index.html → ../index.html
+    });
+  }
+
+  // 「ワークショップに申し込む」 → Googleフォームへ
+  if (goToWorkshopButton) {
+    goToWorkshopButton.addEventListener("click", () => {
+      window.location.href =
+        "https://docs.google.com/forms/d/e/1FAIpQLSeSGh8sGe47gxGbr9ikMCzr5L-RHMObzyRJo4onLc4fnZEitw/viewform?usp=header";
+    });
+  }
+
+  // 「キャンセル」 or 背景クリック → ポップを閉じる
+  if (cancelEndButton) {
+    cancelEndButton.addEventListener("click", closeEndPopup);
+  }
+  if (endBackdrop) {
+    endBackdrop.addEventListener("click", closeEndPopup);
+  }
+});
 
 function closeSiteGuide() {
   document.getElementById("siteGuide").classList.add("hidden");
@@ -178,6 +240,7 @@ async function loadArtworksFromSurvey() {
   query.where = `
     Message IN (
       '逃げる',
+      'もしもの時',
       '大雨のとき、二階に避難！危険なら公園へ！',
       '逃げよう！'
     )
@@ -372,7 +435,7 @@ function handleSproutClick(cluster, sproutElement) {
   const info = document.getElementById("sproutInfo");
   const infoText = document.getElementById("sproutInfoText");
   if (info && infoText) {
-    infoText.textContent = `このあたりには、${cluster.count}つの防災アート作品が咲いています。芽を目印に、どんな作品があるか想像してみよう！`;
+    infoText.innerHTML = `作品の種類が増えると、<br>共助の芽が育ちます！`;
     info.classList.add("show");
 
     if (sproutInfoTimer) clearTimeout(sproutInfoTimer);
@@ -509,6 +572,9 @@ async function handleLike() {
   artworkLikes[currentArtwork.id] = (artworkLikes[currentArtwork.id] || 0) + 1;
 
   updateLikeButton();
+  const btn = document.getElementById("likeButton");
+  btn.classList.add("liked-animate");
+  setTimeout(() => btn.classList.remove("liked-animate"), 600);
   createHeartExplosion();
   renderMarkers();
 

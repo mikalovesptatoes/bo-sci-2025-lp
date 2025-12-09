@@ -1055,6 +1055,44 @@ body {
   fill: white;
 }
 
+.like-button.liked {
+  background: linear-gradient(90deg, #ec4899, #fb7185, #fbbf24);
+  color: white;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+  transform: scale(1.05);
+}
+
+.like-button.liked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.4);
+  animation: likedRipple 0.6s ease-out;
+}
+
+@keyframes likedRipple {
+  from {
+    opacity: 0.8;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+.like-button.liked-animate {
+  animation: likePop 0.6s ease-out;
+}
+
+@keyframes likePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.2); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1.05); }
+}
+
 .like-text {
   display: flex;
   flex-direction: column;
@@ -1245,4 +1283,81 @@ body {
 /* 地図上では ArcGIS JS に全タッチイベントを預ける */
 #mapView {
   touch-action: none;   /* JS ライブラリがピンチ操作をフルで扱えるように */
+}
+
+/* 体験終了ポップアップ */
+.end-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.end-popup.hidden {
+  display: none;
+}
+
+.end-popup-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.end-popup-content {
+  position: relative;
+  z-index: 1;
+  max-width: 320px;
+  width: 90%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.end-popup-title {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+
+.end-popup-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+
+.end-popup-btn {
+  width: 100%;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;   
+  background: #fff;
+  border: 1px solid transparent;
+}
+
+.end-popup-btn.fill-orange {
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: #ffffff;
+  border-color: transparent;
+  margin: 8px 0;
+}
+
+
+.end-popup-cancel {
+  border: none;
+  background: none;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.end-popup-btn.outline-blue {
+  background: #ffffff;
+  color: #2563eb;
+  border-color: #60a5fa;
 }
