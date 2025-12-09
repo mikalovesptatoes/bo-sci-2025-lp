@@ -28,25 +28,25 @@ let currentArtwork = null;
 let hasLiked = false;
 let likedArtworks = JSON.parse(localStorage.getItem("likedArtworks") || "{}");
 let bottomInstruction;
+let allowedArea; // 許可範囲ポリゴン
+let lastValidCamera = null;
 
 // === ArcGIS Map の初期化 & Survey 読み込み ===
-require(["esri/WebScene", "esri/views/SceneView", "esri/geometry/Circle"], (
-  WebScene,
-  SceneView,
-  Circle
-) => {
-  const tsunashimaCenter = {
-    longitude: 139.6348,
-    latitude: 35.534,
-    z: 500,
-  };
-
+require([
+  "esri/WebScene",
+  "esri/views/SceneView",
+  "esri/geometry/Polygon",
+  "esri/geometry/Point",
+  "esri/geometry/geometryEngine",
+], (WebScene, SceneView, Polygon, Point, geometryEngine) => {
+  // WebScene を読み込む
   const scene = new WebScene({
     portalItem: {
       id: "824c34a6b9134c67a8f649d027a08e0c",
     },
   });
 
+  // SceneView を生成（ここではまだ geometry 制限を付けない）
   view = new SceneView({
     container: "mapView",
     map: scene,
@@ -58,45 +58,92 @@ require(["esri/WebScene", "esri/views/SceneView", "esri/geometry/Circle"], (
     },
   });
 
-  view.when(() => {
+  // view が完全に読み込まれてから、残りの処理を行う
+  view.when(async () => {
+    view.popup.autoOpenEnabled = false;
+    view.popup.visible = false;
+    view.map.allLayers.forEach((layer) => {
+      if ("popupEnabled" in layer) {
+        layer.popupEnabled = false;
+      }
+    });
+    window.view = view;
+    // ★ 表示を許可する四角形ポリゴン（view.spatialReference を明示）
+    allowedArea = new Polygon({
+      rings: [
+        [
+          [139.630968, 35.534775],
+          [139.63018738274442, 35.541958799778904],
+          [139.64882985540387, 35.54483473916499],
+          [139.648881029803, 35.53693998416525],
+          [139.630968, 35.534775], // 始点に戻る
+        ],
+      ],
+      spatialReference: view.spatialReference,
+    });
+
+    // ★ この範囲の中だけパン・ズームできるようにする（一次防御）
+    view.constraints.geometry = allowedArea;
+
+    // 初期カメラ位置
     const initialCamera = {
       position: {
-        longitude: 139.415,
-        latitude: 30.62, // ここを少しずつ変えて微調整してOK
-        z: 500, // 高さ
+        x: 15544158.741811443,
+        y: 4236153.707100175,
+        z: 600,
+        spatialReference: {
+          wkid: 102100, // Web Mercator
+          latestWkid: 3857,
+        },
       },
-      tilt: 60,
       heading: 0,
+      tilt: 60,
     };
+    await view.goTo(initialCamera);
+    lastValidCamera = view.camera.clone();
 
-    view.goTo(initialCamera);
-    const maxZoomOutScale = 10000; // 1:15000
+    const MAX_ZOOM_OUT_SCALE = 25000;
 
     view.watch("scale", (scale) => {
-      // ArcGIS の scale は「大きい数字 = より縮小」
-      if (scale > maxZoomOutScale) {
-        view.scale = maxZoomOutScale; // それ以上は縮小させない
+      // scale は「1:scale」の分母。数字が大きいほど広い範囲が見える（＝縮小）
+      if (scale > MAX_ZOOM_OUT_SCALE) {
+        view.scale = MAX_ZOOM_OUT_SCALE;
       }
     });
 
-    const allowedCircle = new Circle({
-      center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
-      radius: 10000,
-      radiusUnit: "meters",
+    // ★ カメラが範囲外に出たら直前の位置へ強制的に戻す（二次防御）
+    view.watch("camera", (camera) => {
+      if (!allowedArea) return;
+
+      const centerPoint = new Point({
+        x: camera.position.x,
+        y: camera.position.y,
+        spatialReference: view.spatialReference,
+      });
+
+      const inside = geometryEngine.contains(allowedArea, centerPoint);
+
+      if (inside) {
+        // 範囲内：直前の合法位置を更新
+        lastValidCamera = camera.clone();
+      } else if (lastValidCamera) {
+        // 範囲外に出た：即座に前の位置へ戻す（アニメなし）
+        view.goTo(lastValidCamera, { animate: false });
+      }
     });
 
-    view.constraints.geometry = allowedCircle;
-
+    // Survey123 レイヤー取得（★ここで初めて view.map を触る）
     surveyLayer = view.map.allLayers.find(
       (lyr) => lyr.title === "survey" || lyr.id === "survey"
     );
 
     if (surveyLayer) {
-      loadArtworksFromSurvey();
+      await loadArtworksFromSurvey();
     } else {
       console.warn("Survey layer not found.");
     }
 
+    // 地図が止まったタイミングでマーカーを再描画
     view.watch("stationary", (v) => {
       if (v && artworks.length) {
         renderMarkers();
@@ -207,11 +254,11 @@ function createDummyComments(artworkId) {
   ];
 
   const authors = [
-    "地域の住人A",
-    "近所の学生",
-    "アート愛好家",
-    "防災士",
-    "ワークショップ参加者",
+    "みのわ",
+    "匿名User",
+    "たけちゃんまま",
+    "サワダ",
+    "匿名User",
   ];
 
   // 作品IDに基づいてコメントの内容を決定的にする（ランダムにならないように）
