@@ -1,3 +1,24 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlAeRjw7Ml8mvR6rvs8IVIWQE3EAM7ZHk",
+  authDomain: "bo-sci-2025-lp.firebaseapp.com",
+  projectId: "bo-sci-2025-lp",
+  storageBucket: "bo-sci-2025-lp.firebasestorage.app",
+  messagingSenderId: "653385182120",
+  appId: "1:653385182120:web:c2da1cfb02b3490ede0b9d",
+  measurementId: "G-S4PL5GM7MF",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 let view; // ArcGIS の MapView を外からも使えるように
 let surveyLayer; // Survey123 レイヤー
 let artworks = []; // Survey から生成した作品リスト
@@ -5,6 +26,7 @@ let artworks = []; // Survey から生成した作品リスト
 let artworkLikes = {};
 let currentArtwork = null;
 let hasLiked = false;
+let likedArtworks = JSON.parse(localStorage.getItem("likedArtworks") || "{}");
 
 // === ArcGIS Map の初期化 & Survey 読み込み ===
 require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
@@ -31,7 +53,7 @@ require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
     center: [tsunashimaCenter.longitude, tsunashimaCenter.latitude],
     zoom: 12,
     constraints: {
-      minScale: 10000,
+      minScale: 15000,
       maxZoom: 18,
       rotationEnabled: false,
     },
@@ -70,17 +92,22 @@ require(["esri/WebMap", "esri/views/MapView", "esri/geometry/Circle"], (
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mapGuideButton").style.display = "none";
+  document.querySelector(".bottom-instruction").classList.remove("show");
 });
+
+const bottomInstruction = document.querySelector(".bottom-instruction");
 
 function closeSiteGuide() {
   document.getElementById("siteGuide").classList.add("hidden");
   document.getElementById("mapGuideButton").style.display = "flex";
+  bottomInstruction.classList.add("show");
 }
 
 // Show site guide
 function showSiteGuide() {
   document.getElementById("siteGuide").classList.remove("hidden");
   document.getElementById("mapGuideButton").style.display = "none";
+  bottomInstruction.classList.remove("show");
 }
 
 // Calculate clusters for sprouts
@@ -106,6 +133,41 @@ function calculateClusters(artworks) {
       count: artworks.length, // 3つの作品で1つの芽
     },
   ];
+}
+
+function createDummyComments(artworkId) {
+  const messages = [
+    "素敵な色合いですね！「逃げよう」という強いメッセージが伝わります。",
+    "私もこの場所の防災について考えさせられました。共感します。",
+    "マッピングのアイデアが面白いです！作品に込められた想いを受け取りました。",
+    "このアートを見て、地域で話題にしたいと思いました！",
+    "美しいです。普段気にしない場所に目が向くのが良いですね。",
+  ];
+
+  const authors = [
+    "地域の住人A",
+    "近所の学生",
+    "アート愛好家",
+    "防災士",
+    "ワークショップ参加者",
+  ];
+
+  // 作品IDに基づいてコメントの内容を決定的にする（ランダムにならないように）
+  const seed = artworkId % 5;
+
+  const dummyComments = [];
+
+  // 3つのダミーコメントを生成
+  for (let i = 0; i < 3; i++) {
+    dummyComments.push({
+      author: authors[(seed + i) % authors.length],
+      text: messages[(seed + i * 2) % messages.length],
+      timestamp: `1時間${(i * 15) % 60}分前`, // ダミーのタイムスタンプ
+      likes: Math.floor(Math.random() * 10) + 1, // ダミーのいいね数
+    });
+  }
+
+  return dummyComments;
 }
 
 async function loadArtworksFromSurvey() {
@@ -141,11 +203,9 @@ async function loadArtworksFromSurvey() {
     let imageUrl = "";
     if (attachmentInfo[oid] && attachmentInfo[oid].length > 0) {
       const att = attachmentInfo[oid][0];
-      // att.url はトークン付きなど、完全なURLになっている
       imageUrl = att.url;
     }
 
-    // ④ 説明文
     const descriptions = [];
     if (a.Mabling) descriptions.push(a.Mabling);
     if (a.collage) descriptions.push(a.collage);
@@ -160,12 +220,23 @@ async function loadArtworksFromSurvey() {
       collage: a.collage || "",
       likes: 0,
       geometry: f.geometry,
-      comments: [],
+      comments: createDummyComments(oid),
     };
   });
 
   artworkLikes = {};
-  artworks.forEach((a) => (artworkLikes[a.id] = a.likes));
+  artworks.forEach((a) => (artworkLikes[a.id] = 0));
+
+  await Promise.all(
+    artworks.map(async (art) => {
+      const ref = doc(db, "likes", String(art.id));
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        artworkLikes[art.id] = data.count || 0;
+      }
+    })
+  );
 
   renderMarkers();
 }
@@ -250,7 +321,6 @@ function createSproutMarker(cluster) {
   return sprout;
 }
 
-// 芽をクリックしたときの演出
 // 芽をクリックしたときの演出
 let sproutInfoTimer = null;
 
@@ -385,7 +455,7 @@ function openModal(artwork) {
     // marbling/collage がまだ無い場合は、従来の description をそのまま表示
     descEl.textContent = artwork.description || "";
   }
-
+  hasLiked = !!likedArtworks[artwork.id];
   updateLikeButton();
   renderComments(artwork.comments);
 
@@ -412,29 +482,46 @@ function updateLikeButton() {
   if (hasLiked) {
     button.classList.add("liked");
     button.disabled = true;
-    buttonText.textContent = "いいね済み！";
+    buttonText.textContent = "作者の想いを受け取りました！";
     icon.style.fill = "white";
   } else {
     button.classList.remove("liked");
     button.disabled = false;
-    buttonText.textContent = "いいね！";
+    buttonText.textContent = "想いを受け取る！";
     icon.style.fill = "none";
   }
 
-  likeCount.textContent = `${
+  likeCount.textContent = `地域で${
     artworkLikes[currentArtwork.id]
-  }人がいいねしています`;
+  }人が共感しています`;
 }
 
 // Handle like
-function handleLike() {
+async function handleLike() {
   if (hasLiked || !currentArtwork) return;
+  likedArtworks[currentArtwork.id] = true;
+  localStorage.setItem("likedArtworks", JSON.stringify(likedArtworks));
 
   hasLiked = true;
-  artworkLikes[currentArtwork.id]++;
+
+  const id = String(currentArtwork.id);
+
+  artworkLikes[currentArtwork.id] = (artworkLikes[currentArtwork.id] || 0) + 1;
+
   updateLikeButton();
   createHeartExplosion();
-  renderMarkers(); // Update markers with new like count
+  renderMarkers();
+
+  try {
+    const ref = doc(db, "likes", id);
+    await setDoc(
+      ref,
+      { count: artworkLikes[currentArtwork.id] },
+      { merge: true }
+    );
+  } catch (e) {
+    console.error("いいねの保存に失敗しました", e);
+  }
 }
 
 // Create heart explosion
@@ -505,3 +592,8 @@ document.addEventListener("click", (e) => {
     closeModal();
   }
 });
+
+window.closeSiteGuide = closeSiteGuide;
+window.showSiteGuide = showSiteGuide;
+window.handleLike = handleLike;
+window.closeModal = closeModal;
