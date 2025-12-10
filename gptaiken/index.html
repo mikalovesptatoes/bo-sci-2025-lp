@@ -1,72 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
-  <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>ご近所アートチャット - 体験版</title>
   <link rel="stylesheet" href="./styles/style.css">
-   <link rel="stylesheet"
-        href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.30/"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <!-- Header -->
-    <header class="header">
+  <header class="header">
     <div class="header-content">
-    
-  <div class="header-left">
-    
-        <div class="logo-and-sub-title"> 
-            <div class="header-logo-box">
-              <img src="/images/bo.png" alt="防" class="header-logo-image">
-            </div>
-            
-            <p class="header-title-sub">お試し版</p>
+
+      <div class="header-left">
+
+        <div class="logo-and-sub-title">
+          <div class="header-logo-box">
+            <img src="/images/bo.png" alt="防" class="header-logo-image">
+          </div>
+
+          <p class="header-title-sub">お試し版</p>
         </div>
 
         <div class="header-text-block">
           <p class="header-tagline">防災 × 市民科学 × アート</p>
           <h1 class="header-title-main">ご近所アートチャット</h1>
-          </div>
         </div>
+      </div>
 
       <div class="header-right">
         <a href="index.html" class="header-back-button">
-        体験を<br/>終わる
+          TOPに戻る
         </a>
       </div>
-  </div>
+    </div>
   </header>
   <!-- 体験終了ポップアップ -->
-<div id="endPopup" class="end-popup hidden">
-  <div class="end-popup-backdrop"></div>
-  <div class="end-popup-content">
-    <h2 class="end-popup-title">体験を終了しますか？</h2>
-    <p class="end-popup-text">
-      このまま終了するか、ワークショップのお申し込みに進むことができます。
-    </p>
-    <div class="end-popup-buttons">
-      <button id="backToTopButton" class="end-popup-btn outline-blue">
-      はじめに戻る
-    </button>
-    <button id="goToWorkshopButton" class="end-popup-btn fill-orange">
-      ワークショップに申し込む
-    </button>
+  <div id="endPopup" class="end-popup hidden">
+    <div class="end-popup-backdrop"></div>
+    <div class="end-popup-content">
+      <h2 class="end-popup-title">体験を終了しますか？</h2>
+      <div class="end-popup-buttons">
+        <button id="backToTopButton" class="end-popup-btn outline-blue">
+          TOPに戻る
+        </button>
+        <button id="goToWorkshopButton" class="end-popup-btn fill-orange">
+          ワークショップに申し込む
+        </button>
 
+      </div>
+      <button id="cancelEndButton" class="end-popup-cancel">
+        キャンセル
+      </button>
     </div>
-    <button id="cancelEndButton" class="end-popup-cancel">
-      キャンセル
-    </button>
   </div>
-</div>
 
-  
+
   <!-- Sprout info popup -->
   <div id="sproutInfo" class="sprout-info">
     <p id="sproutInfoText"></p>
@@ -75,7 +73,8 @@
   <!-- Site Guide -->
   <div id="siteGuide" class="site-guide">
     <button class="guide-close" onclick="closeSiteGuide()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -84,35 +83,54 @@
     <div class="guide-content">
       <div class="guide-item">
         <div class="guide-icon guide-icon-1">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
         </div>
         <div>
-          <p class="guide-text">地域のみなさんが作った作品がマップ上に並んでいます！</p>
+          <p class="guide-text">地域のみなさんが作った作品が</br>マップ上に並んでいます。</p>
         </div>
       </div>
 
       <div class="guide-item">
         <div class="guide-icon guide-icon-2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+            </path>
           </svg>
         </div>
         <div>
-          <p class="guide-text">気になる作品画像をタップして、「想いを受け取る」ボタンを押してみましょう！</p>
+          <p class="guide-text">気になる作品画像をタップして、</br>「想いを受け取る」ボタンを押してみましょう！</p>
         </div>
       </div>
 
       <div class="guide-item">
         <div class="guide-icon guide-icon-3">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         </div>
         <div>
-          <p class="guide-text">作品には、地域の皆さんだからこその気づき、共感が寄せられているかもしれません！</p>
+          <p class="guide-text">作品には、地域の皆さんだからこその気づき、共感が寄せられているかもしれません。</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <div class="guide-icon guide-icon-4">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div>
+          <p class="guide-text">
+            「共助の芽」は地域の共助の想いが育っている証拠です。
+          </p>
+          <p style="font-size: 10px; color: #7c2d12; margin-top: 4px;">
+            ※「共助」とは、地域やコミュニティといった</br><span class="mgr-10">周囲の人たちが協力して助け合うことです。</span>
+          </p>
         </div>
       </div>
 
@@ -122,27 +140,27 @@
     </div>
   </div>
 
-<div class="map-container">
+  <div class="map-container">
 
-  <!-- ArcGIS JS API が描画するマップ本体 -->
-  <div id="mapView">
-    <!-- 作品マーカーを重ねるレイヤー -->
-    <div id="markersContainer" class="markers-container"></div>
+    <!-- ArcGIS JS API が描画するマップ本体 -->
+    <div id="mapView">
+      <!-- 作品マーカーを重ねるレイヤー -->
+      <div id="markersContainer" class="markers-container"></div>
+    </div>
+    <button id="mapGuideButton" class="map-guide-button" onclick="showSiteGuide()">
+
+      <i class="fa-solid fa-question"></i>
+
+    </button>
+
+    <div class="bottom-instruction">
+      <p>
+        <i class="fa-regular fa-hand-pointer"></i>
+        作品を探してタップしてみましょう！
+      </p>
+    </div>
+
   </div>
-      <button id="mapGuideButton" class="map-guide-button" onclick="showSiteGuide()">
-    
-    <i class="fa-solid fa-question"></i>
-    
-  </button>
-
-  <div class="bottom-instruction">
-    <p>
-      <i class="fa-regular fa-hand-pointer"></i> 
-      作品を探してタップしてみましょう！
-    </p>
-  </div>
-
-</div>
 
 
 
@@ -153,7 +171,8 @@
     <div class="modal-content">
       <!-- Close Button -->
       <button class="modal-close" onclick="closeModal()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -170,19 +189,20 @@
         <div class="artwork-info">
           <h2 id="modalTitle" class="artwork-title"></h2>
           <p id="modalAuthor" class="artwork-author"></p>
-          
+
           <div class="artwork-description">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-            </svg>
+
             <p id="modalDescription" class="description-text"></p>
           </div>
 
           <!-- Like Button -->
           <div class="like-button-container">
             <button id="likeButton" class="like-button" onclick="handleLike()">
-              <svg class="like-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              <svg class="like-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                </path>
               </svg>
               <div class="like-text">
                 <span id="likeButtonText">いいね！</span>
@@ -196,7 +216,8 @@
         <!-- Comments Section -->
         <div class="comments-section">
           <div class="comments-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
             <h3>コメント</h3>
@@ -211,14 +232,15 @@
             <div class="comment-input-wrapper">
               <input type="text" placeholder="コメントを入力..." disabled class="comment-input">
               <button disabled class="send-button">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13"></line>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
               </button>
             </div>
             <div class="workshop-notice">
-              <p>コメント送信は、ワークショップ参加時にできます！</p>
+              <p>コメント送信は、ワークショップで</br>ご利用いただけます。</p>
             </div>
           </div>
         </div>
@@ -228,4 +250,5 @@
 
   <script type="module" src="./scripts/script.js"></script>
 </body>
+
 </html>

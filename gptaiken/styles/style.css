@@ -3,19 +3,22 @@
   padding: 0;
   box-sizing: border-box;
 }
-html{
+
+html {
   height: 100%;
-  overflow: hidden; /* 画面のスクロールを禁止 */
+  overflow: hidden;
+  /* 画面のスクロールを禁止 */
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   min-height: 100vh;
   height: 100%;
-  overflow: hidden; 
+  overflow: hidden;
   overflow-x: hidden;
   background: linear-gradient(to bottom, #ffedd5, #fce7f3, #f3e8ff);
 }
+
 
 /* Header */
 .header {
@@ -25,7 +28,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;          
+  right: 0;
   z-index: 40;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -43,23 +46,24 @@ body {
   align-items: flex-start;
   gap: 8px;
 }
+
 .logo-and-sub-title {
-    display: flex;
-    flex-direction: column; 
-    align-items: flex-start; 
-    gap: 2px; 
-    margin-top: 2px; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 .header-logo-box {
   border-radius: 8px;
   display: flex;
-  align-items: flex-start; 
+  align-items: flex-start;
   justify-content: center;
 }
 
 .header-logo-image {
-  height: 30px; 
+  height: 30px;
   width: auto;
   object-fit: contain;
 }
@@ -87,9 +91,9 @@ body {
   letter-spacing: 0.08em;
   /* color: #6b7280; */
   font-family: 'Zen Kurenaido', sans-serif;
-  display: inline-block; 
-  background-color: #fde047; 
-  color: #854d0e;           
+  display: inline-block;
+  background-color: #fde047;
+  color: #854d0e;
   padding: 1px 6px;
   border-radius: 6px;
   font-weight: 700;
@@ -103,15 +107,15 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
+  padding: 10px 9px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #1a16d8, #4d6eff);
+  background: linear-gradient(90deg, #d85d16, #ff9a4d);
   border: none;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 600;
   color: white;
   text-decoration: none;
-  box-shadow: 0 4px 8px rgba(99, 156, 255, 0.35);
+  box-shadow: 0 4px 8px rgba(255, 193, 99, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -134,14 +138,14 @@ body {
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
   position: fixed;
   position: fixed;
-  top: 50%;               
-  left: 50%;              
-  transform: translate(-50%, -50%); 
-  max-height: 90vh;         
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 90vh;
   overflow-y: auto;
-  width: calc(100% - 32px); 
+  width: calc(100% - 32px);
   max-width: 400px;
-  z-index: 45;     
+  z-index: 45;
   animation: slideDown 0.5s ease-out;
 }
 
@@ -154,6 +158,7 @@ body {
     opacity: 0;
     transform: translate(-50%, -50%) translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
@@ -177,15 +182,19 @@ body {
   transition: background 0.2s;
   animation: floatClick 2s ease-in-out infinite;
 }
+
 @keyframes floatClick {
-    0%, 100% {
-        transform: translateY(0);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    50% {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
-    }
+
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  50% {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .guide-close:hover {
@@ -229,6 +238,21 @@ body {
   background: linear-gradient(to bottom right, #c084fc, #60a5fa);
 }
 
+.guide-icon-4 {
+  background: linear-gradient(to bottom right, #4ade80, #16a34a);
+  font-size: 20px;
+  /* FontAwesomeアイコンのサイズ調整 */
+}
+
+.guide-icon-4 i {
+  color: white;
+}
+
+.mgr-10 {
+  margin-left: 10px;
+}
+
+
 .guide-text {
   color: #7c2d12;
   font-size: 14px;
@@ -260,9 +284,9 @@ body {
 /* Map Container */
 .map-guide-button {
   position: absolute;
-  top: 100px; 
-  right: 16px; 
-  z-index: 1000; 
+  top: 100px;
+  right: 16px;
+  z-index: 1000;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -270,12 +294,13 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* より目立つシャドウ */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  /* より目立つシャドウ */
   cursor: pointer;
   border: none;
   transition: transform 0.2s, opacity 0.2s;
   background: linear-gradient(to bottom right, #fb923c, #f472b6);
-  color: white; 
+  color: white;
 }
 
 .map-guide-button:hover {
@@ -285,14 +310,15 @@ body {
 .map-guide-button.hidden {
   display: none;
 }
+
 .map-guide-button i {
-    font-size: 20px; 
-    line-height: 1;  
+  font-size: 20px;
+  line-height: 1;
 }
 
 .map-container {
-  position: fixed; 
-  inset: 0;   
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -317,7 +343,7 @@ body {
   position: absolute;
   inset: 0;
   opacity: 0.2;
-  background-image: 
+  background-image:
     linear-gradient(to right, #cbd5e1 1px, transparent 1px),
     linear-gradient(to bottom, #cbd5e1 1px, transparent 1px);
   background-size: 40px 40px;
@@ -382,7 +408,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  inset: 0;   
+  inset: 0;
   pointer-events: none;
 }
 
@@ -391,7 +417,7 @@ body {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  display: inline-block; 
+  display: inline-block;
   white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
@@ -401,8 +427,8 @@ body {
   border: 2px solid #fdba74;
   opacity: 0;
   pointer-events: none;
-  animation: none; 
-  transition: opacity 0.3s ease; 
+  animation: none;
+  transition: opacity 0.3s ease;
 }
 
 .bottom-instruction p {
@@ -412,28 +438,32 @@ body {
   font-size: 14px;
   color: #c2410c;
 }
+
 .bottom-instruction p i {
-  font-size: 18px; 
-  color: #c2410c; 
+  font-size: 18px;
+  color: #c2410c;
 }
 
 .bottom-instruction.show {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
-  animation: slideUpIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards, 
-             floatClick 2s ease-in-out infinite 0.5s; 
+  animation: slideUpIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+    floatClick 2s ease-in-out infinite 0.5s;
 }
 
 @keyframes floatClick {
-    0%, 100% {
-        transform: translateX(-50%) translateY(0); 
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    50% {
-        transform: translateX(-50%) translateY(-4px); 
-        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
-    }
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* Sprout Marker */
@@ -449,6 +479,7 @@ body {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -463,9 +494,12 @@ body {
 }
 
 @keyframes sproutGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(134, 239, 172, 0);
   }
+
   50% {
     box-shadow: 0 0 30px 15px rgba(134, 239, 172, 0.6);
   }
@@ -477,12 +511,16 @@ body {
 }
 
 @keyframes sproutSway {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
+
   33% {
     transform: translateY(-3px) rotate(5deg);
   }
+
   66% {
     transform: translateY(0) rotate(-5deg);
   }
@@ -526,13 +564,27 @@ body {
 }
 
 @keyframes leafWiggle1 {
-  0%, 100% { transform: rotate(-45deg) translateX(-8px); }
-  50% { transform: rotate(-55deg) translateX(-8px); }
+
+  0%,
+  100% {
+    transform: rotate(-45deg) translateX(-8px);
+  }
+
+  50% {
+    transform: rotate(-55deg) translateX(-8px);
+  }
 }
 
 @keyframes leafWiggle2 {
-  0%, 100% { transform: rotate(45deg) translateX(8px); }
-  50% { transform: rotate(55deg) translateX(8px); }
+
+  0%,
+  100% {
+    transform: rotate(45deg) translateX(8px);
+  }
+
+  50% {
+    transform: rotate(55deg) translateX(8px);
+  }
 }
 
 .sprout-flower {
@@ -546,9 +598,17 @@ body {
 }
 
 @keyframes flowerRotate {
-  from { transform: translateX(-50%) rotate(0deg) scale(1); }
-  50% { transform: translateX(-50%) rotate(180deg) scale(1.2); }
-  to { transform: translateX(-50%) rotate(360deg) scale(1); }
+  from {
+    transform: translateX(-50%) rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: translateX(-50%) rotate(180deg) scale(1.2);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg) scale(1);
+  }
 }
 
 .flower-petal {
@@ -564,8 +624,13 @@ body {
 }
 
 @keyframes petalAppear {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
 }
 
 .flower-center {
@@ -581,8 +646,13 @@ body {
 }
 
 @keyframes centerAppear {
-  from { transform: translate(-50%, -50%) scale(0); }
-  to { transform: translate(-50%, -50%) scale(1); }
+  from {
+    transform: translate(-50%, -50%) scale(0);
+  }
+
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .sprout-sparkle {
@@ -595,8 +665,17 @@ body {
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 0; transform: translateX(-50%) scale(0.8); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.2);
+  }
 }
 
 .sprout-badge {
@@ -615,8 +694,15 @@ body {
 }
 
 @keyframes badgeAppear {
-  from { opacity: 0; transform: translateX(-50%) scale(0); }
-  to { opacity: 1; transform: translateX(-50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 /* =========================
@@ -632,7 +718,8 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 43;        /* ヘッダーより下・マーカーより上くらい */
+  z-index: 43;
+  /* ヘッダーより下・マーカーより上くらい */
   overflow: hidden;
 }
 
@@ -652,20 +739,19 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(0);
   }
+
   to {
     opacity: 0;
-    transform: translate(
-               calc(-50% + var(--dx)),
-               calc(-50% + var(--dy))
-             )
-             scale(1.2);
+    transform: translate(calc(-50% + var(--dx)),
+        calc(-50% + var(--dy))) scale(1.2);
   }
 }
 
 /* 芽の説明ポップ（画面上部） */
 .sprout-info {
   position: fixed;
-  top: 64px; /* ヘッダーの少し下 */
+  top: 64px;
+  /* ヘッダーの少し下 */
   left: 50%;
   transform: translateX(-50%) translateY(-10px);
   background: rgba(255, 255, 255, 0.95);
@@ -713,6 +799,7 @@ body {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -724,9 +811,12 @@ body {
 }
 
 @keyframes popularGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
   }
+
   50% {
     box-shadow: 0 0 20px 8px rgba(251, 146, 60, 0.4);
   }
@@ -840,8 +930,15 @@ body {
 }
 
 @keyframes badgePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .marker-tap-hint {
@@ -866,8 +963,15 @@ body {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-3px); }
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-3px);
+  }
 }
 
 /* Modal */
@@ -886,8 +990,13 @@ body {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-backdrop {
@@ -914,14 +1023,20 @@ body {
   .modal {
     align-items: center;
   }
+
   .modal-content {
     border-radius: 24px;
   }
 }
 
 @keyframes modalSlideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 .modal-close {
@@ -994,13 +1109,15 @@ body {
   gap: 8px;
 }
 
-.artwork-description svg {
+/* .artwork-description svg {
   width: 20px;
   height: 20px;
   color: #f97316;
   flex-shrink: 0;
   margin-top: 2px;
-}
+} */
+
+
 
 .description-text {
   font-size: 14px;
@@ -1039,9 +1156,9 @@ body {
 }
 
 .like-button.liked {
-  background: linear-gradient(90deg, #ef4444, #f87171, #fb923c); 
+  background: linear-gradient(90deg, #ef4444, #f87171, #fb923c);
   color: white;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); 
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
   transform: scale(1.05);
 }
 
@@ -1079,9 +1196,10 @@ body {
     opacity: 0.8;
     transform: scale(0.7);
   }
+
   to {
     opacity: 0;
-    transform: scale(1.4); 
+    transform: scale(1.4);
   }
 }
 
@@ -1090,10 +1208,21 @@ body {
 }
 
 @keyframes likePop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.2); }
-  70%  { transform: scale(0.9); }
-  100% { transform: scale(1.05); }
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.2);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1.05);
+  }
 }
 
 .like-text {
@@ -1104,6 +1233,7 @@ body {
 
 .like-text span:first-child {
   font-size: 14px;
+  font-weight: 700;
 }
 
 .like-count-text {
@@ -1135,9 +1265,11 @@ body {
     opacity: 1;
     transform: scale(0);
   }
+
   50% {
     transform: scale(1.5);
   }
+
   to {
     opacity: 0;
     transform: scale(1);
@@ -1280,12 +1412,14 @@ body {
 .header,
 .site-guide,
 #artworkModal {
-  touch-action: pan-y;  /* 縦スクロールだけ許可（ほぼ動かないけど念のため） */
+  touch-action: pan-y;
+  /* 縦スクロールだけ許可（ほぼ動かないけど念のため） */
 }
 
 /* 地図上では ArcGIS JS に全タッチイベントを預ける */
 #mapView {
-  touch-action: none;   /* JS ライブラリがピンチ操作をフルで扱えるように */
+  touch-action: none;
+  /* JS ライブラリがピンチ操作をフルで扱えるように */
 }
 
 /* 体験終了ポップアップ */
@@ -1325,11 +1459,6 @@ body {
   margin-bottom: 8px;
 }
 
-.end-popup-text {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 16px;
-}
 
 
 .end-popup-btn {
@@ -1338,7 +1467,7 @@ body {
   padding: 10px 14px;
   font-size: 0.95rem;
   cursor: pointer;
-  font-family: inherit;   
+  font-family: inherit;
   background: #fff;
   border: 1px solid transparent;
 }
@@ -1363,4 +1492,33 @@ body {
   background: #ffffff;
   color: #2563eb;
   border-color: #60a5fa;
+}
+
+
+.artwork-description .description-block {
+  margin-bottom: 12px;
+}
+
+.artwork-description .description-block:last-child {
+  margin-bottom: 0;
+}
+
+.artwork-description .description-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f97316;
+  /* オレンジ系の色でラベルを強調 */
+  margin-bottom: 4px;
+  border-bottom: 1px dashed #fdba74;
+  /* ラベルの下に点線を追加 */
+  padding-bottom: 2px;
+  display: block;
+  /* ラベル単体で一行を占めるように */
+}
+
+.artwork-description .description-text {
+  /* 既存のdescription-textのスタイルは流用されるが、より詳細な調整が可能 */
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
 }

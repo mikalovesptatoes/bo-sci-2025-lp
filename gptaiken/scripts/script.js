@@ -266,17 +266,37 @@ function createDummyComments(artworkId) {
 
   const dummyComments = [];
 
+  const availableDays = [10, 9, 8, 7, 6, 5];
+  const YEAR = 2025;
+  const MONTH_INDEX = 11; // 12月は 0 から数えて 11
+
   // 3つのダミーコメントを生成
   for (let i = 0; i < 3; i++) {
+    // artworkIdとiを使って、availableDaysから日付を決定的に選ぶ
+    // (iは0, 1, 2)
+    const dateIndex = (artworkId + i) % availableDays.length;
+    const day = availableDays[dateIndex];
+    
+    // ソート用のDateオブジェクトと表示用の文字列を生成
+    // Dateオブジェクトの月は0-indexed (12月 = 11)
+    const date = new Date(YEAR, MONTH_INDEX, day); 
+    const timestampString = `${MONTH_INDEX + 1}月${day}日`; // 例: "12月10日"
+    
     dummyComments.push({
       author: authors[(seed + i) % authors.length],
       text: messages[(seed + i * 2) % messages.length],
-      timestamp: `1時間${(i * 15) % 60}分前`, // ダミーのタイムスタンプ
-      likes: Math.floor(Math.random() * 10) + 1, // ダミーのいいね数
+      timestamp: timestampString, // 変更後のタイムスタンプ文字列
+      dateObj: date, // ソート用のキー
+      likes: Math.floor(Math.random() * 10) + 1,
     });
   }
 
-  return dummyComments;
+  // ★ 日付（dateObj）に基づいて降順（新しい日付が上）にソート
+  // b - a の順で降順（新しい日付が先）になる
+  dummyComments.sort((a, b) => b.dateObj - a.dateObj);
+  
+  // ソート用の dateObj を取り除いて返す
+  return dummyComments.map(({ dateObj, ...rest }) => rest);
 }
 
 async function loadArtworksFromSurvey() {
@@ -553,11 +573,11 @@ function openModal(artwork) {
   if (marblingText || collageText) {
     descEl.innerHTML = `
       <div class="description-block">
-        <p class="description-label">マーブリングで表現したこと：</p>
+        <p class="description-label">マーブリングで表現したこと：</p> 
         <p class="description-text">${marblingText || "（記入なし）"}</p>
       </div>
       <div class="description-block">
-        <p class="description-label">コラージュで表現したこと：</p>
+        <p class="description-label">コラージュで表現したこと：</p> 
         <p class="description-text">${collageText || "（記入なし）"}</p>
       </div>
     `;
