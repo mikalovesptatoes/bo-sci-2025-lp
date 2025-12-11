@@ -109,13 +109,13 @@ body {
   justify-content: center;
   padding: 10px 9px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #d85d16, #ff9a4d);
+  background: linear-gradient(90deg, #1633d8, #4db5ff);
   border: none;
   font-size: 10px;
   font-weight: 600;
   color: white;
   text-decoration: none;
-  box-shadow: 0 4px 8px rgba(255, 193, 99, 0.35);
+  box-shadow: 0 4px 8px rgba(99, 198, 255, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1278,7 +1278,7 @@ body {
 
 /* Comments Section */
 .comments-section {
-  padding: 24px;
+  padding: 36px;
 }
 
 .comments-header {
@@ -1521,4 +1521,38 @@ body {
   font-size: 14px;
   color: #374151;
   line-height: 1.5;
+}
+
+#mapLoading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+#mapLoading .loader {
+  margin: 0 auto 8px;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #ccc;
+  border-top-color: #666;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* マップロード後にフェードアウト */
+#mapLoading.hide {
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }

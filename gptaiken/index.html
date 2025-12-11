@@ -24,10 +24,6 @@
       <div class="header-left">
 
         <div class="logo-and-sub-title">
-          <div class="header-logo-box">
-            <img src="/images/bo.png" alt="防" class="header-logo-image">
-          </div>
-
           <p class="header-title-sub">お試し版</p>
         </div>
 
@@ -38,9 +34,7 @@
       </div>
 
       <div class="header-right">
-        <a href="index.html" class="header-back-button">
-          TOPに戻る
-        </a>
+        <a href="index.html" class="header-back-button">TOPに戻る</a>
       </div>
     </div>
   </header>
@@ -126,10 +120,10 @@
         </div>
         <div>
           <p class="guide-text">
-            「共助の芽」は地域の共助の想いが育っている証拠です。
+            「共助の芽」は地域の共助の想いが育っている目印です。
           </p>
           <p style="font-size: 10px; color: #7c2d12; margin-top: 4px;">
-            ※「共助」とは、地域やコミュニティといった</br><span class="mgr-10">周囲の人たちが協力して助け合うことです。</span>
+            ※「共助」とは助け合いによる防災です。
           </p>
         </div>
       </div>
@@ -141,6 +135,11 @@
   </div>
 
   <div class="map-container">
+
+    <div id="mapLoading">
+      <div class="loader"></div>
+      <p>マップデータを取得中です…</p>
+    </div>
 
     <!-- ArcGIS JS API が描画するマップ本体 -->
     <div id="mapView">

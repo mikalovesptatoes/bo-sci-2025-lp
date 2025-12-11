@@ -60,6 +60,19 @@ require([
 
   // view が完全に読み込まれてから、残りの処理を行う
   view.when(async () => {
+    document.getElementById("mapLoading").classList.add("hide");
+    setTimeout(() => {
+      document.getElementById("mapLoading").style.display = "none";
+    }, 400);
+
+    view.environment = {
+      ...view.environment,
+      starsEnabled: false,
+      atmosphere: {
+        quality: "low",
+      },
+    };
+
     view.popup.autoOpenEnabled = false;
     view.popup.visible = false;
     view.map.allLayers.forEach((layer) => {
@@ -185,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 「はじめに戻る」 → ルートの index.html へ
   if (backToTopButton) {
     backToTopButton.addEventListener("click", () => {
-      window.location.href = "../index.html"; // gptaiken/index.html → ../index.html
+      window.location.href = "../index.html#demo"; 
     });
   }
 
@@ -243,61 +256,107 @@ function calculateClusters(artworks) {
     },
   ];
 }
+// ===============================
+// 作品ごとの固定コメント一覧（表形式で編集）
+// ===============================
+const COMMENT_TABLE = [
+  // 【大雨のとき】
+  {
+    artworkKey: "大雨のとき",
+    date: "12月10日",
+    author: "たけちゃんまま",
+    text: "たくさんの色を使っていて、工夫されている作品だと思いました。"
+  },
+  {
+    artworkKey: "大雨のとき",
+    date: "12月9日",
+    author: "匿名User",
+    text: "美しいです。普段気にしない場所に目が向くのが良いですね。"
+  },
+  {
+    artworkKey: "大雨のとき",
+    date: "12月8日",
+    author: "匿名User",
+    text: "コラージュがとてもわかりやすく、「逃げよう」という強いメッセージが伝わります。"
+  },
 
-function createDummyComments(artworkId) {
-  const messages = [
-    "素敵な色合いですね！「逃げよう」という強いメッセージが伝わります。",
-    "私もこの場所の防災について考えさせられました。共感します。",
-    "マッピングのアイデアが面白いです！作品に込められた想いを受け取りました。",
-    "このアートを見て、地域で話題にしたいと思いました！",
-    "美しいです。普段気にしない場所に目が向くのが良いですね。",
-  ];
+  // 【逃げる】
+  {
+    artworkKey: "逃げる",
+    date: "12月9日",
+    author: "匿名User",
+    text: "模様がすごく綺麗で魅力的です！"
+  },
+  {
+    artworkKey: "逃げる",
+    date: "12月9日",
+    author: "みのわ",
+    text: "人の色がだんだんと変化しているのがすごいと思いました。"
+  },
+  {
+    artworkKey: "逃げる",
+    date: "12月8日",
+    author: "匿名User",
+    text: "素敵な絵で、作品に込められた想いがよく伝わってきました。"
+  },
 
-  const authors = [
-    "みのわ",
-    "匿名User",
-    "たけちゃんまま",
-    "サワダ",
-    "匿名User",
-  ];
+  // 【逃げよう】
+  {
+    artworkKey: "逃げよう",
+    date: "12月10日",
+    author: "みのわ",
+    text: "馴染みのある場所なので、よく考えさせられました。共感します。"
+  },
+  {
+    artworkKey: "逃げよう",
+    date: "12月9日",
+    author: "サワダ",
+    text: "マーブリングの配色にセンスを感じます…！！"
+  },
+  {
+    artworkKey: "逃げよう",
+    date: "12月9日",
+    author: "匿名User",
+    text: "防災グッズはまだ用意できてないので、早めに準備したいと思いました！"
+  }
+];
 
-  // 作品IDに基づいてコメントの内容を決定的にする（ランダムにならないように）
-  const seed = artworkId % 5;
+// Message 文字列から、どの作品キーかを判定
+function getArtworkKeyFromMessage(message) {
+  if (!message) return null;
 
-  const dummyComments = [];
+  const normalized = message.replace(/[！!]/g, "").trim();
 
-  const availableDays = [10, 9, 8, 7, 6, 5];
-  const YEAR = 2025;
-  const MONTH_INDEX = 11; // 12月は 0 から数えて 11
+  if (normalized.includes("大雨のとき")) return "大雨のとき";
+  if (normalized.startsWith("逃げる")) return "逃げる";
+  if (normalized.startsWith("逃げよう")) return "逃げよう";
 
-  // 3つのダミーコメントを生成
-  for (let i = 0; i < 3; i++) {
-    // artworkIdとiを使って、availableDaysから日付を決定的に選ぶ
-    // (iは0, 1, 2)
-    const dateIndex = (artworkId + i) % availableDays.length;
-    const day = availableDays[dateIndex];
-    
-    // ソート用のDateオブジェクトと表示用の文字列を生成
-    // Dateオブジェクトの月は0-indexed (12月 = 11)
-    const date = new Date(YEAR, MONTH_INDEX, day); 
-    const timestampString = `${MONTH_INDEX + 1}月${day}日`; // 例: "12月10日"
-    
-    dummyComments.push({
-      author: authors[(seed + i) % authors.length],
-      text: messages[(seed + i * 2) % messages.length],
-      timestamp: timestampString, // 変更後のタイムスタンプ文字列
-      dateObj: date, // ソート用のキー
-      likes: Math.floor(Math.random() * 10) + 1,
-    });
+  return null;
+}
+
+// 作品タイトルに対応する固定コメントを取得
+function getFixedCommentsForArtwork(message, fallbackArtworkId) {
+  const key = getArtworkKeyFromMessage(message);
+
+  // 対応するキーがなければ、今までのダミーコメントをそのまま使う
+  if (!key) {
+    return createDummyComments(fallbackArtworkId);
   }
 
-  // ★ 日付（dateObj）に基づいて降順（新しい日付が上）にソート
-  // b - a の順で降順（新しい日付が先）になる
-  dummyComments.sort((a, b) => b.dateObj - a.dateObj);
-  
-  // ソート用の dateObj を取り除いて返す
-  return dummyComments.map(({ dateObj, ...rest }) => rest);
+  const rows = COMMENT_TABLE.filter((row) => row.artworkKey === key);
+
+  if (rows.length === 0) {
+    return createDummyComments(fallbackArtworkId);
+  }
+
+  return rows.map((row) => ({
+    author: row.author,
+    text: row.text,
+    timestamp: row.date, // そのまま「12月10日」などで表示
+    likes: 3,            // 固定値。必要ならここも表で管理できる
+  }));
 }
+
 
 async function loadArtworksFromSurvey() {
   if (!surveyLayer) return;
@@ -350,7 +409,7 @@ async function loadArtworksFromSurvey() {
       collage: a.collage || "",
       likes: 0,
       geometry: f.geometry,
-      comments: createDummyComments(oid),
+      comments: getFixedCommentsForArtwork(a.Message, oid),
     };
   });
 
