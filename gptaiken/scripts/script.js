@@ -17,7 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwTvaUOL8MSBn__gdnq3lnR6pjKS4UuVoEUWVeyULYaDwqoUqRR_Y5_5FibloH4wMhkgQ/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxQgwDsI4SsP_OmhKOUgXKlTUUzhmsfz6TJYyBHwPBLL3ERoUEMc-q9y1hkWTzUv9d0Dg/exec";
 
 let view; // ArcGIS の MapView を外からも使えるように
 let surveyLayer; // Survey123 レイヤー
@@ -696,11 +696,10 @@ async function handleLike() {
   localStorage.setItem("likedArtworks", JSON.stringify(likedArtworks));
 
   hasLiked = true;
-
   const id = String(currentArtwork.id);
 
+  // UI上のカウントを即時更新 (仮)
   artworkLikes[currentArtwork.id] = (artworkLikes[currentArtwork.id] || 0) + 1;
-
   updateLikeButton();
   const btn = document.getElementById("likeButton");
   btn.classList.add("liked-animate");
@@ -708,22 +707,36 @@ async function handleLike() {
   createHeartExplosion();
   renderMarkers();
 
-  try {
-    const response = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ artworkId: id }), 
-    });
-    
-    const result = await response.json();
+  // 外部から見えるJSONPコールバック関数名
+  const callbackName = 'gasLikeCallback_' + Date.now();
+  
+  // GASからのレスポンスを受け取るためのグローバル関数を定義
+  window[callbackName] = function(result) {
+      if (result && result.success) {
+          console.log("いいねの保存に成功しました (GAS/JSONP)");
+      } else {
+          console.error("いいねの保存に失敗しました (GAS/JSONP)", result);
+          // エラー時はUIのカウントを元に戻す
+          artworkLikes[currentArtwork.id] -= 1; 
+          updateLikeButton();
+      }
+      // スクリプトタグを削除してクリーンアップ
+      const script = document.getElementById(callbackName);
+      if (script) script.remove();
+      delete window[callbackName];
+  };
 
-    if (!result.success) {
-        throw new Error(result.error || "GAS処理失敗");
-    }
+  try {
+    // 【修正箇所】JSONPリクエスト用の <script> タグを動的に作成
+    const urlWithParams = `${GAS_API_URL}?artworkId=${encodeURIComponent(id)}&callback=${callbackName}`;
+    
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src = urlWithParams;
+    document.head.appendChild(script);
+
   } catch (e) {
-    console.error("いいねの保存に失敗しました (GAS)", e);
+    console.error("いいねの保存に失敗しました (スクリプト挿入エラー)", e);
     // エラー時はUIのカウントを元に戻す
     artworkLikes[currentArtwork.id] -= 1; 
     updateLikeButton();
