@@ -1,23 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-
-const firebaseConfig = {
-  authDomain: "bo-sci-2025-lp.firebaseapp.com",
-  projectId: "bo-sci-2025-lp",
-  storageBucket: "bo-sci-2025-lp.firebasestorage.app",
-  messagingSenderId: "653385182120",
-  appId: "1:653385182120:web:c2da1cfb02b3490ede0b9d",
-  measurementId: "G-S4PL5GM7MF",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxQgwDsI4SsP_OmhKOUgXKlTUUzhmsfz6TJYyBHwPBLL3ERoUEMc-q9y1hkWTzUv9d0Dg/exec";
+// ===== GAS 連携（Firebaseは完全に不使用）=====
+const GAS_API_URL =
+  "https://script.google.com/macros/s/AKfycbx7VC5n8mdFr-cNAzDDR3O4qFa1e6JdCLHM_E4pm8JbCpMZocXUC9g3IFJ3dyb_Eh14Ug/exec";
 
 let view; // ArcGIS の MapView を外からも使えるように
 let surveyLayer; // Survey123 レイヤー
@@ -31,139 +14,194 @@ let bottomInstruction;
 let allowedArea; // 許可範囲ポリゴン
 let lastValidCamera = null;
 
-// === ArcGIS Map の初期化 & Survey 読み込み ===
-require([
-  "esri/WebScene",
-  "esri/views/SceneView",
-  "esri/geometry/Polygon",
-  "esri/geometry/Point",
-  "esri/geometry/geometryEngine",
-], (WebScene, SceneView, Polygon, Point, geometryEngine) => {
-  // WebScene を読み込む
-  const scene = new WebScene({
-    portalItem: {
-      id: "824c34a6b9134c67a8f649d027a08e0c",
-    },
-  });
+/**
+ * GAS へ JSONP でリクエストする共通関数
+ * - CORS設定不要で呼べる
+ * - GAS側は callback パラメータを見て JSONP を返す想定
+ */
+function gasJsonpRequest(params = {}) {
+  return new Promise((resolve, reject) => {
+    const callbackName =
+      "gasJsonpCb_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
 
-  // SceneView を生成（ここではまだ geometry 制限を付けない）
-  view = new SceneView({
-    container: "mapView",
-    map: scene,
-    constraints: {
-      tilt: {
-        max: 80,
-        mode: "manual",
-      },
-    },
-  });
-
-  // view が完全に読み込まれてから、残りの処理を行う
-  view.when(async () => {
-    document.getElementById("mapLoading").classList.add("hide");
-    setTimeout(() => {
-      document.getElementById("mapLoading").style.display = "none";
-    }, 400);
-
-    view.environment = {
-      ...view.environment,
-      starsEnabled: false,
-      atmosphere: {
-        quality: "low",
-      },
+    window[callbackName] = function (result) {
+      try {
+        resolve(result);
+      } finally {
+        const script = document.getElementById(callbackName);
+        if (script) script.remove();
+        delete window[callbackName];
+      }
     };
 
-    view.popup.autoOpenEnabled = false;
-    view.popup.visible = false;
-    view.map.allLayers.forEach((layer) => {
-      if ("popupEnabled" in layer) {
-        layer.popupEnabled = false;
-      }
-    });
-    window.view = view;
-    // ★ 表示を許可する四角形ポリゴン（view.spatialReference を明示）
-    allowedArea = new Polygon({
-      rings: [
-        [
-          [139.630968, 35.534775],
-          [139.63018738274442, 35.541958799778904],
-          [139.64882985540387, 35.54483473916499],
-          [139.648881029803, 35.53693998416525],
-          [139.630968, 35.534775], // 始点に戻る
-        ],
-      ],
-      spatialReference: view.spatialReference,
+    const qs = new URLSearchParams({ ...params, callback: callbackName }).toString();
+    const urlWithParams = `${GAS_API_URL}?${qs}`.replace(/\/macros\/u\/\d+\/s\//, "/macros/s/");
+
+    const script = document.createElement("script");
+    script.id = callbackName;
+    script.src = urlWithParams;
+
+    script.onerror = (e) => {
+      const s = document.getElementById(callbackName);
+      if (s) s.remove();
+      delete window[callbackName];
+      reject(e);
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchAllLikesFromGAS() {
+  // GAS側の doGet(e) で action === 'readLikes' のときに全件を返す想定
+  return gasJsonpRequest({ action: "readLikes" });
+}
+
+/**
+ * いいねを +1（GAS）
+ * - artworkId を渡すとシート上のカウントを +1 して newCount を返す想定
+ */
+async function incrementLikeOnGAS(artworkId) {
+  return gasJsonpRequest({ artworkId: String(artworkId) });
+}
+
+// === ArcGIS Map の初期化 & Survey 読み込み ===
+require(
+  [
+    "esri/WebScene",
+    "esri/views/SceneView",
+    "esri/geometry/Polygon",
+    "esri/geometry/Point",
+    "esri/geometry/geometryEngine",
+  ],
+  (WebScene, SceneView, Polygon, Point, geometryEngine) => {
+    // WebScene を読み込む
+    const scene = new WebScene({
+      portalItem: {
+        id: "824c34a6b9134c67a8f649d027a08e0c",
+      },
     });
 
-    // ★ この範囲の中だけパン・ズームできるようにする（一次防御）
-    view.constraints.geometry = allowedArea;
-
-    // 初期カメラ位置
-    const initialCamera = {
-      position: {
-        x: 15544158.741811443,
-        y: 4236153.707100175,
-        z: 600,
-        spatialReference: {
-          wkid: 102100, // Web Mercator
-          latestWkid: 3857,
+    // SceneView を生成（ここではまだ geometry 制限を付けない）
+    view = new SceneView({
+      container: "mapView",
+      map: scene,
+      constraints: {
+        tilt: {
+          max: 80,
+          mode: "manual",
         },
       },
-      heading: 0,
-      tilt: 60,
-    };
-    await view.goTo(initialCamera);
-    lastValidCamera = view.camera.clone();
-
-    const MAX_ZOOM_OUT_SCALE = 25000;
-
-    view.watch("scale", (scale) => {
-      // scale は「1:scale」の分母。数字が大きいほど広い範囲が見える（＝縮小）
-      if (scale > MAX_ZOOM_OUT_SCALE) {
-        view.scale = MAX_ZOOM_OUT_SCALE;
-      }
     });
 
-    // ★ カメラが範囲外に出たら直前の位置へ強制的に戻す（二次防御）
-    view.watch("camera", (camera) => {
-      if (!allowedArea) return;
+    // view が完全に読み込まれてから、残りの処理を行う
+    view.when(async () => {
+      document.getElementById("mapLoading").classList.add("hide");
+      setTimeout(() => {
+        document.getElementById("mapLoading").style.display = "none";
+      }, 400);
 
-      const centerPoint = new Point({
-        x: camera.position.x,
-        y: camera.position.y,
+      view.environment = {
+        ...view.environment,
+        starsEnabled: false,
+        atmosphere: {
+          quality: "low",
+        },
+      };
+
+      view.popup.autoOpenEnabled = false;
+      view.popup.visible = false;
+      view.map.allLayers.forEach((layer) => {
+        if ("popupEnabled" in layer) {
+          layer.popupEnabled = false;
+        }
+      });
+      window.view = view;
+
+      // ★ 表示を許可する四角形ポリゴン（view.spatialReference を明示）
+      allowedArea = new Polygon({
+        rings: [
+          [
+            [139.630968, 35.534775],
+            [139.63018738274442, 35.541958799778904],
+            [139.64882985540387, 35.54483473916499],
+            [139.648881029803, 35.53693998416525],
+            [139.630968, 35.534775], // 始点に戻る
+          ],
+        ],
         spatialReference: view.spatialReference,
       });
 
-      const inside = geometryEngine.contains(allowedArea, centerPoint);
+      // ★ この範囲の中だけパン・ズームできるようにする（一次防御）
+      view.constraints.geometry = allowedArea;
 
-      if (inside) {
-        // 範囲内：直前の合法位置を更新
-        lastValidCamera = camera.clone();
-      } else if (lastValidCamera) {
-        // 範囲外に出た：即座に前の位置へ戻す（アニメなし）
-        view.goTo(lastValidCamera, { animate: false });
+      // 初期カメラ位置
+      const initialCamera = {
+        position: {
+          x: 15544158.741811443,
+          y: 4236153.707100175,
+          z: 600,
+          spatialReference: {
+            wkid: 102100, // Web Mercator
+            latestWkid: 3857,
+          },
+        },
+        heading: 0,
+        tilt: 60,
+      };
+      await view.goTo(initialCamera);
+      lastValidCamera = view.camera.clone();
+
+      const MAX_ZOOM_OUT_SCALE = 25000;
+
+      view.watch("scale", (scale) => {
+        // scale は「1:scale」の分母。数字が大きいほど広い範囲が見える（＝縮小）
+        if (scale > MAX_ZOOM_OUT_SCALE) {
+          view.scale = MAX_ZOOM_OUT_SCALE;
+        }
+      });
+
+      // ★ カメラが範囲外に出たら直前の位置へ強制的に戻す（二次防御）
+      view.watch("camera", (camera) => {
+        if (!allowedArea) return;
+
+        const centerPoint = new Point({
+          x: camera.position.x,
+          y: camera.position.y,
+          spatialReference: view.spatialReference,
+        });
+
+        const inside = geometryEngine.contains(allowedArea, centerPoint);
+
+        if (inside) {
+          // 範囲内：直前の合法位置を更新
+          lastValidCamera = camera.clone();
+        } else if (lastValidCamera) {
+          // 範囲外に出た：即座に前の位置へ戻す（アニメなし）
+          view.goTo(lastValidCamera, { animate: false });
+        }
+      });
+
+      // Survey123 レイヤー取得（★ここで初めて view.map を触る）
+      surveyLayer = view.map.allLayers.find(
+        (lyr) => lyr.title === "survey" || lyr.id === "survey"
+      );
+
+      if (surveyLayer) {
+        await loadArtworksFromSurvey();
+      } else {
+        console.warn("Survey layer not found.");
       }
+
+      // 地図が止まったタイミングでマーカーを再描画
+      view.watch("stationary", (v) => {
+        if (v && artworks.length) {
+          renderMarkers();
+        }
+      });
     });
-
-    // Survey123 レイヤー取得（★ここで初めて view.map を触る）
-    surveyLayer = view.map.allLayers.find(
-      (lyr) => lyr.title === "survey" || lyr.id === "survey"
-    );
-
-    if (surveyLayer) {
-      await loadArtworksFromSurvey();
-    } else {
-      console.warn("Survey layer not found.");
-    }
-
-    // 地図が止まったタイミングでマーカーを再描画
-    view.watch("stationary", (v) => {
-      if (v && artworks.length) {
-        renderMarkers();
-      }
-    });
-  });
-});
+  }
+);
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
@@ -198,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 「はじめに戻る」 → ルートの index.html へ
   if (backToTopButton) {
     backToTopButton.addEventListener("click", () => {
-      window.location.href = "../index.html"; 
+      window.location.href = "../index.html";
     });
   }
 
@@ -256,6 +294,7 @@ function calculateClusters(artworks) {
     },
   ];
 }
+
 // ===============================
 // 作品ごとの固定コメント一覧（表形式で編集）
 // ===============================
@@ -265,19 +304,19 @@ const COMMENT_TABLE = [
     artworkKey: "大雨のとき",
     date: "12月10日",
     author: "たけちゃんまま",
-    text: "たくさんの色を使っていて、工夫されている作品だと思いました。"
+    text: "たくさんの色を使っていて、工夫されている作品だと思いました。",
   },
   {
     artworkKey: "大雨のとき",
     date: "12月9日",
     author: "匿名User",
-    text: "美しいです。普段気にしない場所に目が向くのが良いですね。"
+    text: "美しいです。普段気にしない場所に目が向くのが良いですね。",
   },
   {
     artworkKey: "大雨のとき",
     date: "12月8日",
     author: "匿名User",
-    text: "コラージュがとてもわかりやすく、「逃げよう」という強いメッセージが伝わります。"
+    text: "コラージュがとてもわかりやすく、「逃げよう」という強いメッセージが伝わります。",
   },
 
   // 【逃げる】
@@ -285,19 +324,19 @@ const COMMENT_TABLE = [
     artworkKey: "逃げる",
     date: "12月9日",
     author: "匿名User",
-    text: "模様がすごく綺麗で魅力的です！"
+    text: "模様がすごく綺麗で魅力的です！",
   },
   {
     artworkKey: "逃げる",
     date: "12月9日",
     author: "みのわ",
-    text: "人の色がだんだんと変化しているのがすごいと思いました。"
+    text: "人の色がだんだんと変化しているのがすごいと思いました。",
   },
   {
     artworkKey: "逃げる",
     date: "12月8日",
     author: "匿名User",
-    text: "素敵な絵で、作品に込められた想いがよく伝わってきました。"
+    text: "素敵な絵で、作品に込められた想いがよく伝わってきました。",
   },
 
   // 【逃げよう】
@@ -305,20 +344,20 @@ const COMMENT_TABLE = [
     artworkKey: "逃げよう",
     date: "12月10日",
     author: "みのわ",
-    text: "馴染みのある場所なので、よく考えさせられました。共感します。"
+    text: "馴染みのある場所なので、よく考えさせられました。共感します。",
   },
   {
     artworkKey: "逃げよう",
     date: "12月9日",
     author: "サワダ",
-    text: "マーブリングの配色にセンスを感じます…！！"
+    text: "マーブリングの配色にセンスを感じます…！！",
   },
   {
     artworkKey: "逃げよう",
     date: "12月9日",
     author: "匿名User",
-    text: "防災グッズはまだ用意できてないので、早めに準備したいと思いました！"
-  }
+    text: "防災グッズはまだ用意できてないので、早めに準備したいと思いました！",
+  },
 ];
 
 // Message 文字列から、どの作品キーかを判定
@@ -353,10 +392,9 @@ function getFixedCommentsForArtwork(message, fallbackArtworkId) {
     author: row.author,
     text: row.text,
     timestamp: row.date, // そのまま「12月10日」などで表示
-    likes: 3,            // 固定値。必要ならここも表で管理できる
+    likes: 3, // 固定値。必要ならここも表で管理できる
   }));
 }
-
 
 async function loadArtworksFromSurvey() {
   if (!surveyLayer) return;
@@ -416,23 +454,26 @@ async function loadArtworksFromSurvey() {
   // ★ ここでもう表示する → 「待ってる間の無」時間をなくす
   renderMarkers();
 
-  // ⑤ いいね数はバックグラウンドで更新する
-  artworks.forEach(async (art) => {
+  // ⑤ いいね数はバックグラウンドで一括更新する（GAS）
+  (async () => {
     try {
-      const ref = doc(db, "likes", String(art.id));
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const data = snap.data();
-        artworkLikes[art.id] = data.count || 0;
-        // 人気バッジなどを更新したいので再描画
+      const res = await fetchAllLikesFromGAS();
+      // GASの戻り: { success: true, likesData: { "123": 5, ... } }
+      if (res && res.success && res.likesData) {
+        Object.keys(res.likesData).forEach((id) => {
+          artworkLikes[id] = Number(res.likesData[id] || 0);
+        });
+
         renderMarkers();
+        if (currentArtwork) updateLikeButton();
+      } else {
+        console.warn("いいね取得のレスポンス形式が想定と違います", res);
       }
     } catch (e) {
-      console.error("いいねの読み込みに失敗しました", e);
+      console.error("いいねの読み込みに失敗しました (GAS)", e);
     }
-  });
+  })();
 }
-
 
 function getScreenPositionPercent(geometry) {
   if (!view || !geometry) return { top: -999, left: -999 };
@@ -593,9 +634,7 @@ function createArtworkMarker(artwork, position) {
   marker.innerHTML = `
     <div class="marker-container">
       <div class="marker-image-wrapper">
-        <img src="${artwork.imageUrl}" alt="${
-    artwork.title
-  }" class="marker-image">
+        <img src="${artwork.imageUrl}" alt="${artwork.title}" class="marker-image">
       </div>
       <div class="marker-overlay">
         <p class="marker-title">${artwork.title}</p>
@@ -624,9 +663,7 @@ function openModal(artwork) {
   const modal = document.getElementById("artworkModal");
   document.getElementById("modalImage").src = artwork.imageUrl;
   document.getElementById("modalTitle").textContent = artwork.title;
-  document.getElementById(
-    "modalAuthor"
-  ).textContent = `作者：${artwork.author}`;
+  document.getElementById("modalAuthor").textContent = `作者：${artwork.author}`;
 
   // ★ 説明欄を「マーブリング」「コラージュ」に分けて表示
   const descEl = document.getElementById("modalDescription");
@@ -648,6 +685,7 @@ function openModal(artwork) {
     // marbling/collage がまだ無い場合は、従来の description をそのまま表示
     descEl.textContent = artwork.description || "";
   }
+
   hasLiked = !!likedArtworks[artwork.id];
   updateLikeButton();
   renderComments(artwork.comments);
@@ -684,9 +722,7 @@ function updateLikeButton() {
     icon.style.fill = "none";
   }
 
-  likeCount.textContent = `地域で${
-    artworkLikes[currentArtwork.id]
-  }人が共感しています`;
+  likeCount.textContent = `地域で${artworkLikes[currentArtwork.id]}人が共感しています`;
 }
 
 // Handle like
@@ -707,39 +743,31 @@ async function handleLike() {
   createHeartExplosion();
   renderMarkers();
 
-  // 外部から見えるJSONPコールバック関数名
-  const callbackName = 'gasLikeCallback_' + Date.now();
-  
-  // GASからのレスポンスを受け取るためのグローバル関数を定義
-  window[callbackName] = function(result) {
-      if (result && result.success) {
-          console.log("いいねの保存に成功しました (GAS/JSONP)");
-      } else {
-          console.error("いいねの保存に失敗しました (GAS/JSONP)", result);
-          // エラー時はUIのカウントを元に戻す
-          artworkLikes[currentArtwork.id] -= 1; 
-          updateLikeButton();
-      }
-      // スクリプトタグを削除してクリーンアップ
-      const script = document.getElementById(callbackName);
-      if (script) script.remove();
-      delete window[callbackName];
-  };
-
   try {
-    // 【修正箇所】JSONPリクエスト用の <script> タグを動的に作成
-    const urlWithParams = `${GAS_API_URL}?artworkId=${encodeURIComponent(id)}&callback=${callbackName}`;
-    
-    const script = document.createElement('script');
-    script.id = callbackName;
-    script.src = urlWithParams;
-    document.head.appendChild(script);
+    // FirebaseではなくGASへ（JSONP）
+    const result = await incrementLikeOnGAS(id);
 
+    if (result && result.success) {
+      console.log("いいねの保存に成功しました (GAS/JSONP)");
+      // GAS が newCount を返すので反映
+      if (typeof result.newCount === "number") {
+        artworkLikes[currentArtwork.id] = result.newCount;
+        updateLikeButton();
+        renderMarkers();
+      }
+    } else {
+      console.error("いいねの保存に失敗しました (GAS/JSONP)", result);
+      // エラー時はUIのカウントを元に戻す
+      artworkLikes[currentArtwork.id] -= 1;
+      updateLikeButton();
+      renderMarkers();
+    }
   } catch (e) {
-    console.error("いいねの保存に失敗しました (スクリプト挿入エラー)", e);
+    console.error("いいねの保存に失敗しました (GAS/JSONP)", e);
     // エラー時はUIのカウントを元に戻す
-    artworkLikes[currentArtwork.id] -= 1; 
+    artworkLikes[currentArtwork.id] -= 1;
     updateLikeButton();
+    renderMarkers();
   }
 }
 
@@ -760,7 +788,7 @@ function createHeartExplosion() {
 
     heart.innerHTML = `
       <svg viewBox="0 0 24 24">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 0 0 0 0-7.78z"></path>
       </svg>
     `;
 
@@ -791,8 +819,7 @@ function renderComments(comments) {
         <p class="comment-author">${comment.author}</p>
         <span class="comment-timestamp">${comment.timestamp}</span>
       </div>
-      <p class="comment-text">${comment.text}</p>
-      <div class="comment-likes">
+      <p class="comment-text">${comment.text}</p><div class="comment-likes">
         <svg viewBox="0 0 24 24">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
