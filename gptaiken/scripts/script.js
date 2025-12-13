@@ -3,11 +3,10 @@ import {
   getFirestore,
   doc,
   getDoc,
-  setDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDlAeRjw7Ml8mvR6rvs8IVIWQE3EAM7ZHk",
   authDomain: "bo-sci-2025-lp.firebaseapp.com",
   projectId: "bo-sci-2025-lp",
   storageBucket: "bo-sci-2025-lp.firebasestorage.app",
@@ -18,6 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwTvaUOL8MSBn__gdnq3lnR6pjKS4UuVoEUWVeyULYaDwqoUqRR_Y5_5FibloH4wMhkgQ/exec";
 
 let view; // ArcGIS の MapView を外からも使えるように
 let surveyLayer; // Survey123 レイヤー
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 「はじめに戻る」 → ルートの index.html へ
   if (backToTopButton) {
     backToTopButton.addEventListener("click", () => {
-      window.location.href = "../index.html#demo"; 
+      window.location.href = "../index.html"; 
     });
   }
 
@@ -384,20 +384,16 @@ async function loadArtworksFromSurvey() {
     objectIds: result.features.map((f) => f.attributes.objectid),
   });
 
+  // ③ 作品データを作成
   artworks = result.features.map((f) => {
     const a = f.attributes;
     const oid = a.objectid;
 
-    // ③ 添付ファイルURLを安全に取り出す
     let imageUrl = "";
     if (attachmentInfo[oid] && attachmentInfo[oid].length > 0) {
       const att = attachmentInfo[oid][0];
       imageUrl = att.url;
     }
-
-    const descriptions = [];
-    if (a.Mabling) descriptions.push(a.Mabling);
-    if (a.collage) descriptions.push(a.collage);
 
     return {
       id: oid,
@@ -413,22 +409,30 @@ async function loadArtworksFromSurvey() {
     };
   });
 
+  // ④ いったん全部 0 で初期化して、すぐマーカー表示
   artworkLikes = {};
   artworks.forEach((a) => (artworkLikes[a.id] = 0));
 
-  await Promise.all(
-    artworks.map(async (art) => {
+  // ★ ここでもう表示する → 「待ってる間の無」時間をなくす
+  renderMarkers();
+
+  // ⑤ いいね数はバックグラウンドで更新する
+  artworks.forEach(async (art) => {
+    try {
       const ref = doc(db, "likes", String(art.id));
       const snap = await getDoc(ref);
       if (snap.exists()) {
         const data = snap.data();
         artworkLikes[art.id] = data.count || 0;
+        // 人気バッジなどを更新したいので再描画
+        renderMarkers();
       }
-    })
-  );
-
-  renderMarkers();
+    } catch (e) {
+      console.error("いいねの読み込みに失敗しました", e);
+    }
+  });
 }
+
 
 function getScreenPositionPercent(geometry) {
   if (!view || !geometry) return { top: -999, left: -999 };
@@ -705,14 +709,24 @@ async function handleLike() {
   renderMarkers();
 
   try {
-    const ref = doc(db, "likes", id);
-    await setDoc(
-      ref,
-      { count: artworkLikes[currentArtwork.id] },
-      { merge: true }
-    );
+    const response = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ artworkId: id }), 
+    });
+    
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new Error(result.error || "GAS処理失敗");
+    }
   } catch (e) {
-    console.error("いいねの保存に失敗しました", e);
+    console.error("いいねの保存に失敗しました (GAS)", e);
+    // エラー時はUIのカウントを元に戻す
+    artworkLikes[currentArtwork.id] -= 1; 
+    updateLikeButton();
   }
 }
 
